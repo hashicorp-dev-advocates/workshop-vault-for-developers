@@ -1,0 +1,3 @@
+path "payments/*" {
+  capabilities = ["read"]
+}
