@@ -1,0 +1,8 @@
+vault-agent/
+
+payments-app/test/.gradle
+payments-app/test/build
+
+payments-app/java/.gradle
+payments-app/java/build
+payments-app/java/bin
