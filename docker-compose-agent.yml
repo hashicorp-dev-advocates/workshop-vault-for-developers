@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+
+  vault-agent:
+    image: vault:1.11.1
+    restart: always
+    command: [ 'vault', 'agent', '-config=/vault/config.hcl']
+    volumes:
+      - ./vault:/vault:rw
+      - ./vault-agent:/vault-agent:rw
+    cap_add:
+      - IPC_LOCK
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.5
+
+networks:
+  vpcbr:
+    name: workshop-vault-for-developers_vpcbr

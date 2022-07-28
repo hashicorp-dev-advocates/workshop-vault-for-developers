@@ -18,8 +18,8 @@ var adminPassword = env.String("ADMIN_PASSWORD", true, "", "default password for
 type payment struct {
 	Name           string `json:"name"`
 	BillingAddress string `json:"billing_address"`
-	ID             string `json:"id",omitempty`
-	Status         string `json:"status",omitempty`
+	ID             string `json:"id,omitempty"`
+	Status         string `json:"status,omitempty"`
 }
 
 func postPayment(c *gin.Context) {
