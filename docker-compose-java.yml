@@ -1,0 +1,19 @@
+version: "3.3"
+services:
+
+  payments-app:
+    build: payments-app/java
+    image: payments-app:java
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.6
+    ports:
+      - 8081:8081
+    volumes:
+      - ./vault-agent:/vault-agent:r
+    environment:
+      SPRING_CONFIG_LOCATION: "/vault-agent/application.properties"
+
+networks:
+  vpcbr:
+    name: workshop-vault-for-developers_vpcbr

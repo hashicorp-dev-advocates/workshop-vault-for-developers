@@ -25,5 +25,5 @@ auto_auth {
 
 template {
   source      = "/vault/templates/application.properties"
-  destination = "/tmp/application.properties"
+  destination = "/vault-agent/application.properties"
 }

@@ -22,11 +22,11 @@ done
 vault secrets enable -path='payments/database' database
 vault secrets enable -path='payments/secrets' -version=2 kv
 
-vault kv put payments/secrets/processor 'password=payments-admin-password'
+vault kv put payments/secrets/processor 'username=payments-app' 'password=payments-admin-password'
 
 vault write payments/database/config/payments \
 	 	plugin_name=postgresql-database-plugin \
-	 	connection_url='postgresql://{{username}}:{{password}}@payments-database:5432' \
+	 	connection_url='postgresql://{{username}}:{{password}}@payments-database:5432/payments' \
 	 	allowed_roles="payments-app" \
 	 	username="postgres" \
 	 	password="postgres-admin-password"
@@ -34,9 +34,9 @@ vault write payments/database/config/payments \
 vault write payments/database/roles/payments-app \
     db_name=payments \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
-        GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO \"{{name}}\";" \
-    default_ttl="2m" \
-    max_ttl="5m"
+		GRANT ALL PRIVILEGES ON payments TO \"{{name}}\";" \
+    default_ttl="1h" \
+    max_ttl="2h"
 
 vault policy write payments ./vault/policy.hcl
 
