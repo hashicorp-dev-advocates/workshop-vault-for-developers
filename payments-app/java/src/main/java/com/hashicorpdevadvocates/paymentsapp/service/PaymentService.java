@@ -37,6 +37,7 @@ public class PaymentService implements IPaymentService {
         return paymentRepository.findById(id);
     }
 
+    // TODO: Encrypt billing address using Vault Transit Secrets Engine
     @Override
     public ResponseEntity<Payment> create(PaymentRequest payment) {
         PaymentProcessorService paymentProcessor = new PaymentProcessorService(
