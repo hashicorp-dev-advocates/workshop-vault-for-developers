@@ -3,6 +3,7 @@ package com.hashicorpdevadvocates.paymentsapp.service;
 import com.hashicorpdevadvocates.paymentprocessor.model.PaymentRequest;
 import com.hashicorpdevadvocates.paymentprocessor.service.PaymentProcessorService;
 import com.hashicorpdevadvocates.paymentsapp.model.Payment;
+import com.hashicorpdevadvocates.paymentsapp.model.VaultTransit;
 import com.hashicorpdevadvocates.paymentsapp.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +18,9 @@ import java.util.*;
 public class PaymentService implements IPaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
+
+    @Autowired
+    private VaultTransit vault;
 
     @Value("${payment.processor.url}")
     private String url;
@@ -39,16 +43,18 @@ public class PaymentService implements IPaymentService {
         return paymentRepository.findById(id);
     }
 
-    // TODO: Encrypt billing address using Vault Transit Secrets Engine
     @Override
     public ResponseEntity<Payment> create(PaymentRequest payment) {
         PaymentProcessorService paymentProcessor = new PaymentProcessorService(
                 url, username, password
         );
+
         ResponseEntity<Payment> paid = paymentProcessor.submitPayment(
-                    payment.getName(), payment.getBillingAddress());
+                payment.getName(),
+                vault.encrypt(payment.getBillingAddress()));
+
         if (paid.getStatusCode().is2xxSuccessful()) {
-            paid.getBody().setCreatedAt(new Date());
+            Objects.requireNonNull(paid.getBody()).setCreatedAt(new Date());
             paymentRepository.save(paid.getBody());
         }
         return new ResponseEntity<>(paid.getBody(), paid.getStatusCode());

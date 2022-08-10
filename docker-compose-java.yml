@@ -10,7 +10,11 @@ services:
     ports:
       - 8081:8081
     volumes:
-      - ./vault-agent:/root/config:r
+      - ./vault-agent:/root:r
+    entrypoint: ["/bin/sh"]
+    command: ["-c", "export VAULT_TOKEN=$$(cat /root/.vault-token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
+    environment:
+      VAULT_HOST: "vault"
 
 networks:
   vpcbr:

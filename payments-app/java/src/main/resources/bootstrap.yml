@@ -12,5 +12,15 @@ spring:
         composite:
           - type: native
             search-locations: "file://${user.home}/config"
+            order: 1
+          - type: vault
+            kv-version: 2
+            token: ${VAULT_TOKEN}
+            order: 2
+        vault:
+          token: ${VAULT_TOKEN}
+          host: ${VAULT_HOST:127.0.0.1}
         bootstrap: true
         prefix: config
+  main:
+    allow-bean-definition-overriding: true

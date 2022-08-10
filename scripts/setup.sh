@@ -38,7 +38,8 @@ vault write payments/database/roles/payments-app \
     default_ttl="2m" \
     max_ttl="15m"
 
-vault secrets enable -path='payments/encryption' transit
+vault secrets enable transit
+vault write -f transit/keys/payments-app
 
 vault policy write payments ./vault/policy.hcl
 

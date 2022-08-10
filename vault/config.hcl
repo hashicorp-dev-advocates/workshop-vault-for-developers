@@ -18,14 +18,14 @@ auto_auth {
     type = "file"
 
     config = {
-      path = "/vault-agent/token"
+      path = "/vault-agent/.vault-token"
     }
   }
 }
 
 template {
   source      = "/vault/templates/payments-app.properties"
-  destination = "/vault-agent/payments-app.properties"
+  destination = "/vault-agent/config/payments-app.properties"
   exec {
     command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
     timeout = "30s"

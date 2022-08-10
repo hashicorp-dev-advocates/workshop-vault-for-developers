@@ -20,6 +20,7 @@ public class Payment {
 
     @Column(name = "billing_address")
     @JsonProperty("billing_address")
+    @Convert(converter = VaultTransitConverter.class)
     private String billingAddress;
 
     @Column(name = "created_at")
