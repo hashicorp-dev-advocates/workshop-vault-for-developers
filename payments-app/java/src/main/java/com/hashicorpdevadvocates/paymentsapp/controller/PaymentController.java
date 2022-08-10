@@ -12,7 +12,6 @@ import java.util.UUID;
 
 @RestController
 public class PaymentController {
-
     @Autowired
     private PaymentService paymentService;
 

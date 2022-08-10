@@ -35,8 +35,10 @@ vault write payments/database/roles/payments-app \
     db_name=payments \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
 		GRANT ALL PRIVILEGES ON payments TO \"{{name}}\";" \
-    default_ttl="1h" \
-    max_ttl="2h"
+    default_ttl="2m" \
+    max_ttl="15m"
+
+vault secrets enable -path='payments/encryption' transit
 
 vault policy write payments ./vault/policy.hcl
 

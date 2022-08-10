@@ -10,9 +10,7 @@ services:
     ports:
       - 8081:8081
     volumes:
-      - ./vault-agent:/vault-agent:r
-    environment:
-      SPRING_CONFIG_LOCATION: "/vault-agent/application.properties"
+      - ./vault-agent:/root/config:r
 
 networks:
   vpcbr:

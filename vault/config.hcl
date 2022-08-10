@@ -24,6 +24,10 @@ auto_auth {
 }
 
 template {
-  source      = "/vault/templates/application.properties"
-  destination = "/vault-agent/application.properties"
+  source      = "/vault/templates/payments-app.properties"
+  destination = "/vault-agent/payments-app.properties"
+  exec {
+    command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
+    timeout = "30s"
+  }
 }

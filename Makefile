@@ -10,4 +10,5 @@ java:
 clean:
 	docker compose -f docker-compose-java.yml down || true
 	docker compose -f docker-compose-agent.yml down || true
+	rm -rf vault-agent/
 	bash scripts/cleanup.sh
