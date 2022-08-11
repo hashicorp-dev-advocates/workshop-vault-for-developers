@@ -1,10 +1,17 @@
 pid_file = "/vault-agent/pidfile"
 
+// Define Vault agent's connection to Vault server.
+// Since we are using docker-compose, we resolve to the `vault` DNS.
 vault {
   address = "http://vault:8200"
 }
 
+
 auto_auth {
+  // This demonstration uses AppRole authentication. When you set up Vault,
+  // the scripts wrote the role-id and secret-id to a file. You can think of
+  // AppRole authentication method as a username/password combination
+  // for automation.
   method {
     type = "approle"
     config = {
@@ -14,6 +21,10 @@ auto_auth {
     }
   }
 
+  // For this demonstration, we need the Vault token so the application
+  // can call the Vault API and access the transit secrets engine.
+  // If your application does not call the Vault API directly, it does not
+  // need this configuration.
   sink {
     type = "file"
 
@@ -23,9 +34,14 @@ auto_auth {
   }
 }
 
+// Template out secrets to a `payments-app.properties` file, compatible
+// with Spring Boot (Java).
 template {
   source      = "/vault/templates/payments-app.properties"
   destination = "/vault-agent/config/payments-app.properties"
+
+  // When Vault agent renders a new template (because a secret changed), run
+  // a command to refresh the Spring Boot application.
   exec {
     command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
     timeout = "30s"

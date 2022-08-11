@@ -5,14 +5,29 @@ spring:
   application:
     name: payments-app
   profiles:
+    ## An embedded Spring Cloud Config Server requires
+    ## a composite profile.
     active: composite
   cloud:
     config:
+      ## Set up Spring Cloud Config Server for actuator refresh.
+      ## We use an embedded Spring Cloud Config Server set up in application
+      ## bootstrap. Without config server, the actuator does not pick up changes to
+      ## properties.
       server:
+        ## Bootstrap the embedded Spring Cloud Config Server. Actuator will read
+        ## configuration changes from the `/config/payments-app/default` path.
+        bootstrap: true
+        prefix: config
         composite:
+          ## We want to reference the `native` profile because the properties
+          ## created by Vault agent are written to a local file.
           - type: native
             search-locations: "file://${user.home}/config"
             order: 1
+          ## Set up a Vault profile for the Spring Cloud Vault library. Config server
+          ## also uses the same Vault initialization, so we can't remove this from
+          ## bootstrap.
           - type: vault
             kv-version: 2
             token: ${VAULT_TOKEN}
@@ -20,7 +35,6 @@ spring:
         vault:
           token: ${VAULT_TOKEN}
           host: ${VAULT_HOST:127.0.0.1}
-        bootstrap: true
-        prefix: config
+  ## Override the config server settings for separate settings for Spring Cloud Vault.
   main:
     allow-bean-definition-overriding: true
