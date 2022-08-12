@@ -34,11 +34,29 @@ auto_auth {
   }
 }
 
-// Template out secrets to a `payments-app.properties` file, compatible
+// Use one template for database secrets and another for payment processor
+// secrets. This demonstration uses two templates to mimic how you would
+// configure the template files on Kubernetes using annotations.
+
+// Template out database secrets to `database/payments-app.properties` file, compatible
 // with Spring Boot (Java).
 template {
-  source      = "/vault/templates/payments-app.properties"
-  destination = "/vault-agent/config/payments-app.properties"
+  source      = "/vault/templates/database/payments-app.properties"
+  destination = "/vault-agent/config/database/payments-app.properties"
+
+  // When Vault agent renders a new template (because a secret changed), run
+  // a command to refresh the Spring Boot application.
+  exec {
+    command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
+    timeout = "30s"
+  }
+}
+
+// Template out database secrets to `processor/payments-app.properties` file, compatible
+// with Spring Boot (Java).
+template {
+  source      = "/vault/templates/processor/payments-app.properties"
+  destination = "/vault-agent/config/processor/payments-app.properties"
 
   // When Vault agent renders a new template (because a secret changed), run
   // a command to refresh the Spring Boot application.
