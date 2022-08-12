@@ -54,6 +54,3 @@ vault write auth/approle/role/payments-app \
 
 echo "payments-app" > ./vault-agent/role-id
 vault write -f -field=secret_id auth/approle/role/payments-app/secret-id > ./vault-agent/secret-id
-
-vault secrets enable -path='inventory/secrets' -version=2 kv
-vault kv put inventory/secrets/tea 'username=tea' 'password=spilled'

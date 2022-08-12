@@ -16,8 +16,8 @@ services:
         ipv4_address: 10.5.0.2
 
   payments-database:
-    build: database
-    image: db
+    build: payments-database
+    image: payments-database
     networks:
       vpcbr:
         ipv4_address: 10.5.0.3

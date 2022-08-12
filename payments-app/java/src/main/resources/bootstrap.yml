@@ -23,17 +23,15 @@ spring:
           ## We want to reference the `native` profile because the properties
           ## created by Vault agent are written to a local file.
           - type: native
-            search-locations: "file://${user.home}/config/database,file://${user.home}/config/processor"
+            search-locations: "file://${CONFIG_HOME:user.home}/config/database,file://${CONFIG_HOME:user.home}/config/processor"
             order: 1
           ## Set up a Vault profile for the Spring Cloud Vault library. Config server
           ## also uses the same Vault initialization, so we can't remove this from
           ## bootstrap.
           - type: vault
             kv-version: 2
-            token: ${VAULT_TOKEN}
             order: 2
         vault:
-          token: ${VAULT_TOKEN}
           host: ${VAULT_HOST:127.0.0.1}
   ## Override the config server settings for separate settings for Spring Cloud Vault.
   main:

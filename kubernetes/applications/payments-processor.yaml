@@ -1,0 +1,40 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-processor
+  labels:
+    app: payments-processor
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+  selector:
+    app: payments-processor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: payments-processor
+      app: payments-processor
+  template:
+    metadata:
+      labels:
+        service: payments-processor
+        app: payments-processor
+    spec:
+      containers:
+        - name: payments-processor
+          image: payments-processor
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ADMIN_PASSWORD
+              value: "payments-admin-password"
