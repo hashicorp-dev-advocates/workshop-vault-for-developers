@@ -12,9 +12,10 @@ services:
     volumes:
       - ./vault-agent:/root:r
     entrypoint: ["/bin/sh"]
-    command: ["-c", "export VAULT_TOKEN=$$(cat /root/.vault-token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
+    command: ["-c", "java -XX:+UseContainerSupport -Dspring.cloud.config.server.vault.token=$$(cat /root/.vault-token) -Dspring.cloud.vault.token=$$(cat /root/.vault-token) -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
     environment:
       VAULT_HOST: "vault"
+      CONFIG_HOME: "/root"
 
 networks:
   vpcbr:
