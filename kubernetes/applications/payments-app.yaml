@@ -56,6 +56,8 @@ spec:
           payment.processor.username={{ .Data.data.username }}
           payment.processor.password={{ .Data.data.password }}
           {{- end }}
+        vault.hashicorp.com/agent-inject-command-processor: |
+          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh || true
 
         vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
         vault.hashicorp.com/secret-volume-path-database: "/vault/secrets/config/database"
@@ -66,6 +68,8 @@ spec:
           payments.db.username={{ .Data.username }}
           payments.db.password={{ .Data.password }}
           {{- end }}
+        vault.hashicorp.com/agent-inject-command-database: |
+          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh || true
 
     spec:
       serviceAccountName: payments-app

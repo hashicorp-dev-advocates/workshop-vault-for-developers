@@ -5,7 +5,6 @@ setup:
 	eval $(minikube docker-env)
 	cd ../payments-database && docker build -t payments-database .
 	cd ../payments-processor && docker build -t payments-processor .
-	cd ../payments-app/java && docker build -t payments-app:java .
 	helm upgrade --install vault hashicorp/vault -f helm/vault.yaml
 	kubectl rollout status deployment/vault-agent-injector
 	kubectl apply -f applications/payments-database.yaml
@@ -15,6 +14,8 @@ setup:
 	bash scripts/setup.sh
 
 java:
+	eval $(minikube docker-env)
+	cd ../payments-app/java && docker build -t payments-app:java .
 	kubectl apply -f applications/payments-app.yaml
 	kubectl rollout status deployment/payments-app
 
