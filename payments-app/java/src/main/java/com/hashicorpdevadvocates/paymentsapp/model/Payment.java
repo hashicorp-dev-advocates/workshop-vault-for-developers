@@ -24,6 +24,7 @@ public class Payment {
     private String billingAddress;
 
     @Column(name = "created_at")
+    @JsonProperty("created_at")
     private Date createdAt;
 
     @Transient
