@@ -16,7 +16,7 @@ services:
         ipv4_address: 10.5.0.2
 
   payments-database:
-    build: payments-database
+    build: ../payments-database
     image: payments-database
     networks:
       vpcbr:
@@ -28,7 +28,7 @@ services:
       POSTGRES_DB: "payments"
 
   payments-processor:
-    build: payments-processor
+    build: ../payments-processor
     image: payments-processor
     networks:
       vpcbr:

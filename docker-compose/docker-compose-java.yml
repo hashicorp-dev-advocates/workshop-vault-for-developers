@@ -2,7 +2,7 @@ version: "3.3"
 services:
 
   payments-app:
-    build: payments-app/java
+    build: ../payments-app/java
     image: payments-app:java
     networks:
       vpcbr:

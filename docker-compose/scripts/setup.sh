@@ -4,6 +4,7 @@ set -e -o pipefail
 
 mkdir -p ./vault-agent
 
+export COMPOSE_PROJECT_NAME=workshop-vault-for-developers
 export VAULT_ADDR='http://127.0.0.1:8200'
 export VAULT_TOKEN='some-root-token'
 
@@ -41,7 +42,7 @@ vault write payments/database/roles/payments-app \
 vault secrets enable transit
 vault write -f transit/keys/payments-app
 
-vault policy write payments ./vault/policy.hcl
+vault policy write payments ../vault/policy.hcl
 
 vault auth enable approle
 
