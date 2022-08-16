@@ -1,0 +1,529 @@
+{
+	"info": {
+		"_postman_id": "18397023-1c45-4aed-9482-17449535a14f",
+		"name": "hashicorp-dev-advocates/workshop-vault-for-developers",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22856022"
+	},
+	"item": [
+		{
+			"name": "payments-app",
+			"item": [
+				{
+					"name": "Returns details about payment records",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should include entry for Red Panda\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    const panda = jsonData.find(m => m.name == \"Red Panda\");",
+									"    pm.expect(panda.billing_address).equals(\"8 Eastern Himalayas Drive\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "List of payment records successfully processed",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payments",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payments"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "[\n  {\n    \"id\": \"ullamco consectetur adipisicing magna\",\n    \"name\": \"laboris ut reprehend\",\n    \"billing_address\": \"esse dolore exercitation\",\n    \"created_at\": \"Excepteur pariatur\",\n    \"status\": \"proident irure reprehenderit ullamco\"\n  },\n  {\n    \"id\": \"enim labore nostrud aliquip ea\",\n    \"name\": \"labore do eu magna\",\n    \"billing_address\": \"dolore anim ad culpa in\",\n    \"created_at\": \"irure\",\n    \"status\": \"non deserunt eu dolor\"\n  }\n]"
+						}
+					]
+				},
+				{
+					"name": "Submit a payment to processor and create a record",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"paymentName\", \"Postman\");",
+									"pm.collectionVariables.set(\"paymentBillingAddress\", \"100 Echo Lane\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response should include encrypted entry for Postman\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"object\", \"Should return specific payment object\");",
+									"    pm.expect(jsonData.name).equals(\"Postman\");",
+									"    pm.expect(jsonData.billing_address).contains(\"vault:v1\");",
+									"    pm.expect(jsonData.status).contains(\"success\");",
+									"    pm.expect(jsonData).has.property(\"created_at\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{paymentName}}\",\n  \"billing_address\": \"{{paymentBillingAddress}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/payments",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Payment ID and other details if processed succesfully.",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"cupidatat deserunt\",\n  \"billing_address\": \"ut elit Ut\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{baseUrl}}/payments",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payments"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"status\": \"adip\",\n  \"name\": \"voluptate nisi aute\",\n  \"billing_address\": \"non in sunt culpa ad\",\n  \"id\": \"esse sint sit anim\",\n  \"created_at\": \"magna\"\n}"
+						}
+					]
+				},
+				{
+					"name": "Returns detail about specific payment record by ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"paymentId\", \"2310d6be-0e80-11ed-861d-0242ac120002\");"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response should include entry for Red Panda\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"object\", \"Should return specific payment object\");",
+									"    pm.expect(jsonData.name).equals(\"Red Panda\");",
+									"    pm.expect(jsonData.billing_address).equals(\"8 Eastern Himalayas Drive\");",
+									"    pm.expect(jsonData).to.have.property(\"created_at\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/payments/:id",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"payments",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "{{paymentId}}",
+									"description": "(Required) Unique ID for payment record"
+								}
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Payment record if successfully processed",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payments/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payments",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "ullamco cupid",
+											"description": "(Required) Unique ID for payment record"
+										}
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"id\": \"veniam elit do\",\n  \"name\": \"nisi aute\",\n  \"billing_address\": \"et id dolore\",\n  \"created_at\": \"dolor non veniam tempor\",\n  \"status\": \"et sunt enim aliqua nostrud\"\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "vault",
+			"item": [
+				{
+					"name": "Get the payment processor's API username and password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"vaultToken\", \"some-root-token\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Vault-Token",
+								"value": "{{vaultToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{vaultUrl}}/v1/payments/secrets/data/processor",
+							"host": [
+								"{{vaultUrl}}"
+							],
+							"path": [
+								"v1",
+								"payments",
+								"secrets",
+								"data",
+								"processor"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get the payment database's username and password",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"vaultToken\", \"some-root-token\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "X-Vault-Token",
+								"value": "{{vaultToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{vaultUrl}}/v1/payments/database/creds/payments-app",
+							"host": [
+								"{{vaultUrl}}"
+							],
+							"path": [
+								"v1",
+								"payments",
+								"database",
+								"creds",
+								"payments-app"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "payments-processor",
+			"item": [
+				{
+					"name": "Submit encrypted payment for processing",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"paymentName\", \"Postman\");",
+									"pm.collectionVariables.set(\"paymentBillingAddressEncrypted\", \"vault:v1:mYjr5kM1MuJZUMnZINji93pAUEUrf9cflAAxvgBaIHPfRQsoX7vGvcU=\");",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"pm.test(\"Response should include encrypted entry for Postman\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an(\"object\", \"Should return specific payment object\");",
+									"    pm.expect(jsonData.name).equals(\"Postman\");",
+									"    pm.expect(jsonData.billing_address).contains(\"vault:v1\");",
+									"    pm.expect(jsonData.status).contains(\"success\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "password",
+									"value": "{{processorPassword}}",
+									"type": "string"
+								},
+								{
+									"key": "username",
+									"value": "{{processorUsername}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"{{paymentName}}\",\n  \"billing_address\": \"{{paymentBillingAddressEncrypted}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{processorUrl}}/submit",
+							"host": [
+								"{{processorUrl}}"
+							],
+							"path": [
+								"submit"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"pm.collectionVariables.set(\"processorUsername\", \"payments-app\");",
+							"pm.collectionVariables.set(\"processorPassword\", \"payments-admin-password\");"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "localhost:8081",
+			"type": "string"
+		},
+		{
+			"key": "paymentName",
+			"value": ""
+		},
+		{
+			"key": "paymentBillingAddress",
+			"value": ""
+		},
+		{
+			"key": "paymentId",
+			"value": ""
+		},
+		{
+			"key": "vaultUrl",
+			"value": "http://localhost:8200",
+			"type": "string"
+		},
+		{
+			"key": "vaultToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "paymentBillingAddressEncrypted",
+			"value": ""
+		},
+		{
+			"key": "paymentProcessorUsername",
+			"value": ""
+		},
+		{
+			"key": "processorPassword",
+			"value": ""
+		},
+		{
+			"key": "processorUsername",
+			"value": ""
+		}
+	]
+}
