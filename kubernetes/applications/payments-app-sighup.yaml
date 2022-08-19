@@ -46,9 +46,9 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "payments-app"
         vault.hashicorp.com/agent-inject-token: "true"
-        vault.hashicorp.com/agent-run-as-same-user: "true"
-        vault.hashicorp.com/agent-cache-enable: "true"
-        vault.hashicorp.com/template-static-secret-render-interval: "10m"
+        vault.hashicorp.com/agent-run-as-same-user: "true" # Required for termination signal
+        vault.hashicorp.com/agent-cache-enable: "true" # Use cached secrets and lease from vault-agent initialization to agent
+        vault.hashicorp.com/template-static-secret-render-interval: "5m" # Defaults to 5 minutes, update if you want static secrets checked more frequently
 
         vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
         vault.hashicorp.com/secret-volume-path-processor: "/vault/secrets/config/processor"
@@ -76,7 +76,7 @@ spec:
 
     spec:
       serviceAccountName: payments-app
-      shareProcessNamespace: true
+      shareProcessNamespace: true # Required for termination signal
       containers:
         - name: payments-app
           image: payments-app:java
@@ -98,6 +98,6 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 10
             failureThreshold: 30
-          securityContext:
-            runAsUser: 1000
-            runAsGroup: 3000
+          securityContext: # Required for termination signal
+            runAsUser: 1000 # Required for termination signal
+            runAsGroup: 3000 # Required for termination signal
