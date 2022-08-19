@@ -336,6 +336,9 @@ spec:
     metadata:
       ## omitted for clarity
       annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "payments-app"
+        vault.hashicorp.com/agent-cache-enable: "true" # Use cached secrets and lease from vault-agent initialization to agent
         ## omitted for clarity
         vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
         vault.hashicorp.com/secret-volume-path-processor: "/vault/secrets/config/processor"
@@ -424,17 +427,17 @@ spec:
 
 Depends on your framework!
 
-Otherwise, write reload logic in application (e.g., respond to system signal).
+If _no_ live reload, need code to respond to termination signal (e.g., `SIGHUP`).
 
 ------
 
 Choose your adventure.
 
-[Spring Boot](#/7/10)
+[Spring Boot - Live Reload](#/7/10)
 
 ------
 
-### Spring Boot
+### Spring Boot - Live Reload
 
 - Set up embedded Spring Cloud Config Server
   ```shell
@@ -480,6 +483,7 @@ $ curl localhost:8081/payments
 ------
 
 Define Vault agent's [`exec`](https://developer.hashicorp.com/vault/docs/agent/template#exec)
+or [`command`](https://developer.hashicorp.com/vault/docs/agent/template#command)
 stanza to run a command that reloads the application.
 
 ------
@@ -511,7 +515,7 @@ template {
 #### Kubernetes
 
 Add [`vault.hashicorp.com/agent-inject-command`](https://developer.hashicorp.com/vault/docs/platform/k8s/injector/annotations#vault-hashicorp-com-agent-inject-command)
-annotation.
+annotation to issue termination signal.
 
 ```yaml
 ## omitted for clarity
@@ -521,8 +525,17 @@ spec:
     metadata:
       annotations:
         ## omitted for clarity
-        vault.hashicorp.com/agent-inject-command-processor: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh || true
+        vault.hashicorp.com/agent-run-as-same-user: "true" # required for SIGHUP
+        vault.hashicorp.com/agent-inject-command-database: |
+          kill -HUP $(pidof java)
+    spec:
+      ## omitted for clarity
+      shareProcessNamespace: true # required for SIGHUP
+      containers:
+        - name: payments-app
+          securityContext: # required for SIGHUP
+            runAsUser: 1000 # required for SIGHUP
+            runAsGroup: 3000 # required for SIGHUP
 ```
 
 [Continue →](#/7/18)
@@ -535,12 +548,20 @@ spec:
 ```shell
 [INFO] (runner) executing command
 "[\"wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh\"]"
-from "/vault/templates/payments-app.properties" => "/vault-agent/config/payments-app.properties"
+from "/vault/templates/payments-app.properties" => "/vault-agent/config/database/payments-app.properties"
 
 [INFO] (child) spawning: sh -c
 wget -qO- --header='Content-Type:application/json'
 --post-data='{}' http://payments-app:8081/actuator/refresh
 ```
+
+------
+
+### Static Secrets (Key-Value)
+
+Renders every 5 minutes by default.
+
+Change with [`static_secret_render_interval`](https://developer.hashicorp.com/vault/docs/agent/template#static_secret_render_interval).
 
 ---
 
