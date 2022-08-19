@@ -46,6 +46,8 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "payments-app"
         vault.hashicorp.com/agent-inject-token: "true"
+        vault.hashicorp.com/agent-cache-enable: "true"
+        vault.hashicorp.com/template-static-secret-render-interval: "10m"
 
         vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
         vault.hashicorp.com/secret-volume-path-processor: "/vault/secrets/config/processor"
@@ -57,7 +59,7 @@ spec:
           payment.processor.password={{ .Data.data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-processor: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh || true
+          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
 
         vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
         vault.hashicorp.com/secret-volume-path-database: "/vault/secrets/config/database"
@@ -69,7 +71,7 @@ spec:
           payments.db.password={{ .Data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-database: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh || true
+          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
 
     spec:
       serviceAccountName: payments-app
