@@ -27,7 +27,7 @@ vault write payments/database/roles/payments-app \
     creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
 		GRANT ALL PRIVILEGES ON payments TO \"{{name}}\";" \
     default_ttl="2m" \
-    max_ttl="15m"
+    max_ttl="4m"
 
 vault secrets enable transit
 vault write -f transit/keys/payments-app

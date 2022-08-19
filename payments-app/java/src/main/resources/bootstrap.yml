@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT:8081}
+  shutdown: graceful
 
 spring:
   application:
