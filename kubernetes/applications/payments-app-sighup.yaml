@@ -46,6 +46,7 @@ spec:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "payments-app"
         vault.hashicorp.com/agent-inject-token: "true"
+        vault.hashicorp.com/agent-run-as-same-user: "true"
         vault.hashicorp.com/agent-cache-enable: "true"
         vault.hashicorp.com/template-static-secret-render-interval: "10m"
 
@@ -59,7 +60,7 @@ spec:
           payment.processor.password={{ .Data.data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-processor: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
+          kill -HUP $(pidof java)
 
         vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
         vault.hashicorp.com/secret-volume-path-database: "/vault/secrets/config/database"
@@ -71,10 +72,11 @@ spec:
           payments.db.password={{ .Data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-database: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
+          kill -HUP $(pidof java)
 
     spec:
       serviceAccountName: payments-app
+      shareProcessNamespace: true
       containers:
         - name: payments-app
           image: payments-app:java
@@ -96,3 +98,6 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 10
             failureThreshold: 30
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 3000
