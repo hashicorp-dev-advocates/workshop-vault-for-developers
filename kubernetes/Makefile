@@ -17,8 +17,8 @@ setup:
 java:
 	eval $(minikube -p minikube docker-env)
 	cd ../payments-app/java && docker build -t payments-app:java .
-	kubectl apply -f applications/payments-app.yaml
-	# kubectl apply -f applications/payments-app-sighup.yaml
+	# kubectl apply -f applications/payments-app.yaml
+	kubectl apply -f applications/payments-app-term.yaml
 	kubectl rollout status deployment/payments-app
 
 clean:

@@ -60,7 +60,7 @@ spec:
           payment.processor.password={{ .Data.data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-processor: |
-          kill -HUP $(pidof java)
+          kill -TERM $(pidof java)
 
         vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
         vault.hashicorp.com/secret-volume-path-database: "/vault/secrets/config/database"
@@ -72,7 +72,7 @@ spec:
           payments.db.password={{ .Data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-database: |
-          kill -HUP $(pidof java)
+          kill -TERM $(pidof java)
 
     spec:
       serviceAccountName: payments-app
