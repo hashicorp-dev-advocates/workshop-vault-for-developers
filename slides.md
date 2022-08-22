@@ -114,7 +114,7 @@ Demo uses Kubernetes.
 
 ## Kubernetes
 
-1. Install and start [Minikube](https://minikube.sigs.k8s.io/docs/start/).
+1. Install [Minikube](https://minikube.sigs.k8s.io/docs/start/).
 
 1. Install [Vault CLI](https://www.vaultproject.io/docs/install).
 
@@ -277,10 +277,8 @@ spec:
 
         ## omitted for clarity
 
-        vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
-        vault.hashicorp.com/secret-volume-path-processor: "/vault/secrets/config/processor"
-        vault.hashicorp.com/agent-inject-file-processor: "payments-app.properties"
-        vault.hashicorp.com/agent-inject-template-processor: |
+        vault.hashicorp.com/agent-inject-secret-processor.properties: "payments/secrets/data/processor"
+        vault.hashicorp.com/agent-inject-template-processor.properties: |
           payment.processor.url=http://payments-processor:8080
           {{- with secret "payments/secrets/processor" }}
           payment.processor.username={{ .Data.data.username }}
@@ -304,14 +302,10 @@ spec:
         ## omitted for clarity
 
         # Template for processor secrets
-        vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
-        vault.hashicorp.com/secret-volume-path-processor: "/vault-agent/config/processor"
-        vault.hashicorp.com/agent-inject-file-processor: "payments-app.properties"
+        vault.hashicorp.com/agent-inject-secret-processor.properties: "payments/secrets/data/processor"
 
         # Template for database secrets
-        vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
-        vault.hashicorp.com/secret-volume-path-database: "/vault-agent/config/database"
-        vault.hashicorp.com/agent-inject-file-database: "payments-app.properties"
+        vault.hashicorp.com/agent-inject-secret-database.properties: "payments/database/creds/payments-app"
 ```
 
 ---
@@ -360,13 +354,13 @@ Vault changes the username and password every few minutes.
 
 ------
 
-### 2.1. Refactor application to reload
+### 2.1. Refactor application to update secrets
 
 ------
 
 Depends on your framework!
 
-If _no_ live reload, need code to respond to termination signal (e.g., `SIGTERM`).
+If _no_ live reload, restart application with termination signal (e.g., `SIGTERM`).
 
 ------
 
@@ -380,30 +374,55 @@ Choose your adventure.
 
 ### Spring Boot - Termination Signal
 
-Enable graceful shutdown in `bootstrap.yml`
+In `application.properties`...
 
-```yaml
-server:
-  shutdown: graceful
-```
+- Import Spring config from local file.
+  ```plaintext
+  spring.config.import=file:${CONFIG_HOME:/vault/secrets}/database.properties,
+    file:${CONFIG_HOME:/vault/secrets}/processor.properties
+  ```
 
-[Continue →](#/7/11)
+- Enable graceful shutdown.
+  ```plaintext
+  server.shutdown=graceful
+  ```
+
+[Continue →](#/7/12)
 
 ------
 
 ### Spring Boot - Live Reload
 
-- Set up embedded Spring Cloud Config Server
-  ```shell
-  $ cat payments-app/java/src/main/resources/bootstrap.yml
+In `application.properties`...
+
+- Import Spring config from local file.
+  ```plaintext
+  spring.config.import=file:${CONFIG_HOME:/vault/secrets}/database.properties,
+    file:${CONFIG_HOME:/vault/secrets}/processor.properties
   ```
 
 - Enable Spring Boot Actuator `refresh` endpoint
-  ```shell
-  $ cat payments-app/java/src/main/resources/application.properties
+  ```plaintext
+  management.endpoints.web.exposure.include=refresh,health
   ```
 
-[Continue →](#/7/11)
+------
+
+- Refactor application with `@RefreshScope` annotation to identify beans to reload.
+  ```java
+  @Bean
+  @RefreshScope
+  DataSource dataSource(DataSourceProperties properties) {
+    return DataSourceBuilder
+        .create()
+        .url(properties.getUrl())
+        .username(properties.getUsername())
+        .password(properties.getPassword())
+        .build();
+  }
+  ```
+
+[Continue →](#/7/12)
 
 ------
 
@@ -444,9 +463,9 @@ stanza to run a command that reloads the application.
 
 Choose your adventure.
 
-[Kubernetes - Termination Signal](#/7/16)
+[Kubernetes - Termination Signal](#/7/17)
 
-[Kubernetes - Live Reload](#/7/17)
+[Kubernetes - Live Reload](#/7/18)
 
 ------
 
@@ -476,7 +495,7 @@ spec:
             runAsGroup: 3000
 ```
 
-[Continue →](#/7/18)
+[Continue →](#/7/19)
 
 ------
 
@@ -497,7 +516,7 @@ spec:
           wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
 ```
 
-[Continue →](#/7/18)
+[Continue →](#/7/19)
 
 ------
 
@@ -544,13 +563,14 @@ Choose your adventure.
 ### Spring Boot
 
 - Add [Spring Cloud Vault](https://cloud.spring.io/spring-cloud-vault/reference/html/) to dependencies.
-  ```shell
-  $ cat payments-app/java/build.gradle
+  ```java
+  implementation 'org.springframework.cloud:spring-cloud-vault-config'
   ```
 
-- Configure Vault connection for Spring Cloud Vault.
-  ```shell
-  $ cat payments-app/java/src/main/resources/bootstrap.yml
+- Configure Vault connection for Spring Cloud Vault in `application.properties`.
+  ```plaintext
+  spring.cloud.vault.uri=${VAULT_ADDR:http://127.0.0.1:8200}
+  spring.cloud.vault.token=${VAULT_TOKEN}
   ```
 
 ------
@@ -572,7 +592,10 @@ spec:
         - name: payments-app
           ## omitted for clarity
           command: ["/bin/sh"]
-          args: ["-c", "java -XX:+UseContainerSupport -Dspring.cloud.config.server.vault.token=$(cat /vault/secrets/token) -Dspring.cloud.vault.token=$(cat /vault/secrets/token) -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
+          args: ["-c", "export VAULT_TOKEN=$(cat /vault/secrets/token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
+          env:
+            - name: VAULT_ADDR
+              value: http://vault:8200
 ```
 
 [Continue →](#/8/6)
@@ -705,7 +728,7 @@ $ curl $(minikube service payments-app --url)/payments/SOME_PAYMENT_ID
    1. Learn how to use Vault Agent
 
 1. Reloads when a secret changes.
-   1. Refactor application to reload
+   1. Refactor application to update secrets
    1. Configure Vault agent to reload application
 
 

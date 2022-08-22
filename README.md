@@ -1,12 +1,6 @@
 # Workshop: HashiCorp Vault for Development Teams
 
-Workshop to teach HashiCorp Vault for development teams.
-
-This is a template set of slides and demo code to help you
-teach development teams about Vault.
-
-- It does not teach everything about Vault.
-- You can alter the flow of the workshop as you require.
+Workshop template to teach HashiCorp Vault for development teams.
 
 ## Objectives
 
@@ -26,6 +20,55 @@ Write an application that...
    1. Install Vault SDK for application
    1. Write code to encrypt/decrypt with Vault keys
 
+## Prerequisites
+
+- [Docker for Desktop](https://www.docker.com/products/docker-desktop/) v4.11.1
+- [Vault CLI](https://www.vaultproject.io/docs/install) v1.11.1+
+- [Kubernetes](https://kubernetes.io/docs/tasks/tools/#kubectl) v1.24.3+
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/) v1.26.1+
+
+
+## Demo Application
+
+```plaintext
+                              Get all payments from database
+                 ┌───────────────────────────────────────────────────────┐
+                 │                                                       │
+                 │                                                       │
+                 │                                                       │
+                 │        3.If success, store encrypted payload          ▼
+           payments-app────────────────────────────────────────────►payments-database
+           │          ▲
+           │          │
+           │          │
+1.POST     │          │ 2.Return
+  encrypted│          │ payment
+  payload  │          │ status
+           │          │
+           ▼          │
+           payments-processor
+```
+
+## Usage
+
+### Kubernetes
+
+For Kubernetes, you can review the tasks in the `kubernetes/Makefile` directory.
+
+Run the commands in order...
+
+1. `make setup`
+1. `make java`
+
+### Docker Compose
+
+For Docker-only (mostly for in-depth examination), you can review
+the tasks in the `docker-compose/Makefile` directory.
+
+### Clean Up
+
+To clean up deployments, run `make clean` in the working directory
+for the Docker or Kubernetes setups.
 
 ## Supported Platforms
 
