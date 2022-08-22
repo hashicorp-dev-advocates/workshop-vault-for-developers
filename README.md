@@ -27,7 +27,11 @@ Write an application that...
    1. Write code to encrypt/decrypt with Vault keys
 
 
+## Supported Platforms
+
+- Kubernetes - in code and slides
+- Docker (using Docker for Desktop) - in code only
+
 ## Supported Languages & Frameworks
 
-- Java (Spring)
-
+- Spring Boot (Java)

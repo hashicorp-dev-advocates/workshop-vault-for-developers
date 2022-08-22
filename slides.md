@@ -108,45 +108,11 @@ Your application _must_...
 
 ------
 
-Choose [Docker](#/5/3) or [Kubernetes](#/5/7).
-
-------
-
-## Docker
-
-------
-
-1. Install [Docker Desktop](https://www.docker.com/products/docker-desktop/).
-
-1. Install [Vault CLI](https://www.vaultproject.io/docs/install).
-
-1. Clone [hashicorp-dev-advocates/workshop-vault-for-developers](https://github.com/hashicorp-dev-advocates/workshop-vault-for-developers).
-
-------
-
-### Optional
-
-1. Install [Postman](https://www.postman.com/downloads/) for easier API calls.
-
-1. Import the Postman collection from the `postman/` directory.
-
-------
-
-Change to Docker working directory and
-set up your environment.
-
-```shell
-$ cd docker-compose
-$ make setup
-```
-
-[Get started!](#/6)
+Demo uses Kubernetes.
 
 ------
 
 ## Kubernetes
-
-------
 
 1. Install and start [Minikube](https://minikube.sigs.k8s.io/docs/start/).
 
@@ -178,8 +144,6 @@ set up your environment.
 $ cd kubernetes
 $ make setup
 ```
-
-[Get started!](#/6)
 
 ---
 
@@ -281,38 +245,6 @@ Usage: vault agent [options]
 
 ------
 
-Choose [Docker](#/6/17) or [Kubernetes](#/6/19).
-
-------
-
-### Docker
-
-- Review Vault agent configuration.
-  ```shell
-  $ cat vault/config.hcl
-  ```
-
-- Run the agent.
-  ```shell
-  $ make agent
-  ```
-
-------
-
-Agent creates new file with secrets.
-
-```shell
-$ cat vault-agent/config/processor/payments-app.properties
-
-payment.processor.url=http://payments-processor:8080
-payment.processor.username=payments-app
-payment.processor.password=payments-admin-password
-```
-
-[Continue →](#/7)
-
-------
-
 ### Kubernetes
 
 - Review Vault agent configuration.
@@ -323,6 +255,8 @@ payment.processor.password=payments-admin-password
 - Injector already running in your cluster.
   ```shell
   $ kubectl get pods
+  vault-0                                1/1     Running
+  vault-agent-injector-bb5cd485b-glqfj   1/1     Running
   ```
 
 ------
@@ -338,8 +272,11 @@ spec:
       annotations:
         vault.hashicorp.com/agent-inject: "true"
         vault.hashicorp.com/role: "payments-app"
-        vault.hashicorp.com/agent-cache-enable: "true" # Use cached secrets and lease from vault-agent initialization to agent
+        # Use cached secrets and lease from vault-agent initialization to agent
+        vault.hashicorp.com/agent-cache-enable: "true"
+
         ## omitted for clarity
+
         vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
         vault.hashicorp.com/secret-volume-path-processor: "/vault/secrets/config/processor"
         vault.hashicorp.com/agent-inject-file-processor: "payments-app.properties"
@@ -351,7 +288,31 @@ spec:
           {{- end }}
 ```
 
-[Continue →](#/7)
+------
+
+#### Secrets in different paths
+
+Create an annotation and template _per_ secret path.
+
+```yaml
+## omitted for clarity
+spec:
+  template:
+    metadata:
+      ## omitted for clarity
+      annotations:
+        ## omitted for clarity
+
+        # Template for processor secrets
+        vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
+        vault.hashicorp.com/secret-volume-path-processor: "/vault-agent/config/processor"
+        vault.hashicorp.com/agent-inject-file-processor: "payments-app.properties"
+
+        # Template for database secrets
+        vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
+        vault.hashicorp.com/secret-volume-path-database: "/vault-agent/config/database"
+        vault.hashicorp.com/agent-inject-file-database: "payments-app.properties"
+```
 
 ---
 
@@ -366,8 +327,9 @@ spec:
 
 ------
 
-This example uses dynamic _database_ secrets. Vault changes
-the database username and password every few minutes.
+This example uses dynamic _database_ secrets.
+
+Vault changes the username and password every few minutes.
 
 ------
 
@@ -376,40 +338,17 @@ the database username and password every few minutes.
 1. Retrieves the database username and password.
 1. Writes template with secrets to a file.
    ```shell
-   $ cat vault-agent/config/database/payments-app.properties
+   $ cat /vault/secrets/config/database/payments-app.properties
 
    payments.db.url=jdbc:postgresql://payments-database:5432/payments
    payments.db.username=v-approle-payments-bS8xAMJgZHt9qIg0n28z-1660319749
    payments.db.password=NtkaNwyBIC6q7IKisA-z
    ```
-1. Renders new template for new database username and password.
+1. Renders new file with new credentials.
 
 ------
 
-> Your Vault team probably set up dynamic secrets in Vault for you but your application needs to account for secret changes.
-
-------
-
-#### Multiple secrets for Kubernetes
-
-For secrets in different paths, create an annotation and template _per_ secret path.
-
-```yaml
-## omitted for clarity
-spec:
-  template:
-    metadata:
-      ## omitted for clarity
-      annotations:
-        ## omitted for clarity
-        vault.hashicorp.com/agent-inject-secret-processor: "payments/secrets/data/processor"
-        vault.hashicorp.com/secret-volume-path-processor: "/vault-agent/config/processor"
-        vault.hashicorp.com/agent-inject-file-processor: "payments-app.properties"
-
-        vault.hashicorp.com/agent-inject-secret-database: "payments/database/creds/payments-app"
-        vault.hashicorp.com/secret-volume-path-database: "/vault-agent/config/database"
-        vault.hashicorp.com/agent-inject-file-database: "payments-app.properties"
-```
+> Your Vault team probably set up dynamic secrets in Vault for you.
 
 ------
 
@@ -427,13 +366,28 @@ spec:
 
 Depends on your framework!
 
-If _no_ live reload, need code to respond to termination signal (e.g., `SIGHUP`).
+If _no_ live reload, need code to respond to termination signal (e.g., `SIGTERM`).
 
 ------
 
 Choose your adventure.
 
+[Spring Boot - Termination Signal](#/7/9)
+
 [Spring Boot - Live Reload](#/7/10)
+
+------
+
+### Spring Boot - Termination Signal
+
+Enable graceful shutdown in `bootstrap.yml`
+
+```yaml
+server:
+  shutdown: graceful
+```
+
+[Continue →](#/7/11)
 
 ------
 
@@ -449,6 +403,8 @@ Choose your adventure.
   $ cat payments-app/java/src/main/resources/application.properties
   ```
 
+[Continue →](#/7/11)
+
 ------
 
 #### Run the Spring Boot application
@@ -457,14 +413,12 @@ Choose your adventure.
 $ make java
 ```
 
-[Continue →](#/7/12)
-
 ------
 
 ### Test the application
 
 ```shell
-$ curl localhost:8081/payments
+$ curl $(minikube service payments-app --url)/payments
 
 [
   {
@@ -488,31 +442,15 @@ stanza to run a command that reloads the application.
 
 ------
 
-Choose [Docker](#/7/16) or [Kubernetes](#/7/17).
+Choose your adventure.
+
+[Kubernetes - Termination Signal](#/7/16)
+
+[Kubernetes - Live Reload](#/7/17)
 
 ------
 
-### Docker
-
-```hcl
-template {
-  source      = "/vault/templates/database/payments-app.properties"
-  destination = "/vault-agent/config/database/payments-app.properties"
-
-  // When Vault agent renders a new template (because a secret changed), run
-  // a command to refresh the Spring Boot application.
-  exec {
-    command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
-    timeout = "30s"
-  }
-}
-```
-
-[Continue →](#/7/18)
-
-------
-
-#### Kubernetes
+#### Kubernetes - Termination Signal
 
 Add [`vault.hashicorp.com/agent-inject-command`](https://developer.hashicorp.com/vault/docs/platform/k8s/injector/annotations#vault-hashicorp-com-agent-inject-command)
 annotation to issue termination signal.
@@ -525,39 +463,56 @@ spec:
     metadata:
       annotations:
         ## omitted for clarity
-        vault.hashicorp.com/agent-run-as-same-user: "true" # required for SIGHUP
+        vault.hashicorp.com/agent-run-as-same-user: "true"
         vault.hashicorp.com/agent-inject-command-database: |
-          kill -HUP $(pidof java)
+          kill -TERM $(pidof java)
     spec:
       ## omitted for clarity
-      shareProcessNamespace: true # required for SIGHUP
+      shareProcessNamespace: true
       containers:
         - name: payments-app
-          securityContext: # required for SIGHUP
-            runAsUser: 1000 # required for SIGHUP
-            runAsGroup: 3000 # required for SIGHUP
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 3000
 ```
 
 [Continue →](#/7/18)
 
 ------
 
-### Example of Vault agent reloading
+#### Kubernetes - Live Reload
+
+Add [`vault.hashicorp.com/agent-inject-command`](https://developer.hashicorp.com/vault/docs/platform/k8s/injector/annotations#vault-hashicorp-com-agent-inject-command)
+annotation to reload application properties.
+
+```yaml
+## omitted for clarity
+spec:
+  ## omitted for clarity
+  template:
+    metadata:
+      annotations:
+        ## omitted for clarity
+        vault.hashicorp.com/agent-inject-command-database: |
+          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
+```
+
+[Continue →](#/7/18)
+
+------
+
+#### Vault agent reloads application
 
 
 ```shell
-[INFO] (runner) executing command
-"[\"wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh\"]"
-from "/vault/templates/payments-app.properties" => "/vault-agent/config/database/payments-app.properties"
-
-[INFO] (child) spawning: sh -c
-wget -qO- --header='Content-Type:application/json'
---post-data='{}' http://payments-app:8081/actuator/refresh
+[INFO] (runner) rendered "(dynamic)" => "/vault/secrets/config/database/payments-app.properties"
+[INFO] (runner) executing command "[\"kill -TERM $(pidof java)\\n\"]" from "(dynamic)" => "/vault/secrets/config/database/payments-app.properties"
+[INFO] (child) spawning: sh -c kill -TERM $(pidof java)
 ```
 
 ------
 
-### Static Secrets (Key-Value)
+#### Static Secrets (Key-Value)
 
 Renders every 5 minutes by default.
 
@@ -602,16 +557,22 @@ Choose your adventure.
 
 Override container entrypoint with Vault agent token.
 
-```shell
-$ cat docker-compose-java.yaml
-
-  entrypoint: ["/bin/sh"]
-  command: [
-    "-c",
-    "java -XX:+UseContainerSupport
-      -Dspring.cloud.config.server.vault.token=$$(cat /root/.vault-token)
-      -Dspring.cloud.vault.token=$$(cat /root/.vault-token)"
-  ]
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-app
+spec:
+  ## omitted for clarity
+  template:
+    ## omitted for clarity
+    spec:
+    ## omitted for clarity
+      containers:
+        - name: payments-app
+          ## omitted for clarity
+          command: ["/bin/sh"]
+          args: ["-c", "java -XX:+UseContainerSupport -Dspring.cloud.config.server.vault.token=$(cat /vault/secrets/token) -Dspring.cloud.vault.token=$(cat /vault/secrets/token) -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
 ```
 
 [Continue →](#/8/6)
@@ -645,25 +606,11 @@ public class VaultTransit {
     @Autowired
     VaultOperations vault;
 
-```
-
-------
-
-```java
-// VaultTransit.java
-
     @Value("${payment.transit.path:transit}")
     private String path;
 
     @Value("${payment.transit.key:payments-app}")
     private String key;
-
-```
-
-------
-
-```java
-// VaultTransit.java
 
     public String decrypt(String billingAddress) {
         return vault.opsForTransit(path).decrypt(key, billingAddress);
@@ -711,7 +658,7 @@ public class VaultTransitConverter implements AttributeConverter<String, String>
 }
 ```
 
-[Continue →](#/8/13)
+[Continue →](#/8/11)
 
 ------
 
@@ -719,12 +666,12 @@ public class VaultTransitConverter implements AttributeConverter<String, String>
 
 ```shell
 $ curl -XPOST \
-  localhost:8081/payments \
+  $(minikube service payments-app --url)/payments \
   -d '{"name":"Pangolin","billing_address":"4 Cape Street"}' \
   -H "Content-Type:application/json"
 
 {
-  "id": "09f09919-6c0b-4bd3-ba4a-2b57f63c8de2",
+  "id": "SOME_PAYMENT_ID",
   "name": "Pangolin",
   "createdAt": "2022-08-11T19:53:58.275+00:00",
   "status": "success, payment information transmitted securely",
@@ -737,7 +684,7 @@ $ curl -XPOST \
 ### Test the application
 
 ```shell
-$ curl localhost:8081/payments/09f09919-6c0b-4bd3-ba4a-2b57f63c8de2
+$ curl $(minikube service payments-app --url)/payments/SOME_PAYMENT_ID
 
 {
   "id": "09f09919-6c0b-4bd3-ba4a-2b57f63c8de2",
@@ -775,4 +722,5 @@ $ curl localhost:8081/payments/09f09919-6c0b-4bd3-ba4a-2b57f63c8de2
   - [Auth Methods](https://developer.hashicorp.com/vault/docs/auth)
   - [Secrets Engines](https://developer.hashicorp.com/vault/docs/secrets)
   - [Vault Agent](https://developer.hashicorp.com/vault/docs/agent)
+  - [Kubernetes Annotations](https://developer.hashicorp.com/vault/docs/platform/k8s/injector/annotations)
 - [Spring Cloud Vault](https://cloud.spring.io/spring-cloud-vault/reference/html/)
