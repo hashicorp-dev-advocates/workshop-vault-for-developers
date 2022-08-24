@@ -41,8 +41,8 @@ auto_auth {
 // Template out database secrets to `database/payments-app.properties` file, compatible
 // with Spring Boot (Java).
 template {
-  source      = "/vault/templates/database/payments-app.properties"
-  destination = "/vault-agent/config/database/payments-app.properties"
+  source      = "/vault/templates/database.properties"
+  destination = "/vault-agent/config/database.properties"
 
   // When Vault agent renders a new template (because a secret changed), run
   // a command to refresh the Spring Boot application.
@@ -55,8 +55,8 @@ template {
 // Template out database secrets to `processor/payments-app.properties` file, compatible
 // with Spring Boot (Java).
 template {
-  source      = "/vault/templates/processor/payments-app.properties"
-  destination = "/vault-agent/config/processor/payments-app.properties"
+  source      = "/vault/templates/processor.properties"
+  destination = "/vault-agent/config/processor.properties"
 
   // When Vault agent renders a new template (because a secret changed), run
   // a command to refresh the Spring Boot application.

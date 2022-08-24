@@ -24,7 +24,8 @@ Write an application that...
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop/) v4.11.1
 - [Vault CLI](https://www.vaultproject.io/docs/install) v1.11.1+
-- If you want to learn about Vault agent with Kubernetes, [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+- [Kubernetes](https://kubernetes.io/docs/tasks/tools/#kubectl) v1.24.3+
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/) v1.26.1+
 
 
 ## Demo Application
@@ -50,11 +51,21 @@ Write an application that...
 
 ## Usage
 
-For Docker-only (mostly for in-depth examination), you can review
-the tasks in the `Makefile` at the top level of this repository.
+### Kubernetes
 
-For Kubernetes-specific configuration (for annotations), review the
-tasks in the `kubernetes/Makefile` folder.
+For Kubernetes, you can review the tasks in the `kubernetes/Makefile` directory.
+
+Run the commands in order...
+
+1. `make setup`
+1. `make java`
+
+### Docker Compose
+
+For Docker-only (mostly for in-depth examination), you can review
+the tasks in the `docker-compose/Makefile` directory.
+
+### Clean Up
 
 To clean up deployments, run `make clean` in the working directory
 for the Docker or Kubernetes setups.

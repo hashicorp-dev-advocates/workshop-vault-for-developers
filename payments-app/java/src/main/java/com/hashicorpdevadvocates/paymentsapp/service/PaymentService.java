@@ -6,15 +6,12 @@ import com.hashicorpdevadvocates.paymentsapp.model.Payment;
 import com.hashicorpdevadvocates.paymentsapp.model.VaultTransit;
 import com.hashicorpdevadvocates.paymentsapp.repository.PaymentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-@RefreshScope
 public class PaymentService implements IPaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
@@ -22,20 +19,12 @@ public class PaymentService implements IPaymentService {
     @Autowired
     private VaultTransit vault;
 
-    @Value("${payment.processor.url}")
-    private String url;
-
-    @Value("${payment.processor.username}")
-    private String username;
-
-    @Value("${payment.processor.password}")
-    private String password;
+    @Autowired
+    private PaymentProcessorService paymentProcessor;
 
     @Override
-    public List<Payment> list() {
-        List<Payment> payments = new ArrayList<>();
-        paymentRepository.findAll().forEach(payments::add);
-        return payments;
+    public Collection<Payment> list() {
+        return new ArrayList<>(paymentRepository.findAll());
     }
 
     @Override
@@ -45,10 +34,6 @@ public class PaymentService implements IPaymentService {
 
     @Override
     public ResponseEntity<Payment> create(PaymentRequest payment) {
-        PaymentProcessorService paymentProcessor = new PaymentProcessorService(
-                url, username, password
-        );
-
         ResponseEntity<Payment> paid = paymentProcessor.submitPayment(
                 payment.getName(),
                 vault.encrypt(payment.getBillingAddress()));

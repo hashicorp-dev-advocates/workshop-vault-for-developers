@@ -2,6 +2,9 @@ package com.hashicorpdevadvocates.paymentprocessor.service;
 
 import com.hashicorpdevadvocates.paymentprocessor.model.PaymentRequest;
 import com.hashicorpdevadvocates.paymentsapp.model.Payment;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
@@ -14,7 +17,9 @@ public class PaymentProcessorService {
 
     private WebClient webClient;
 
-    public PaymentProcessorService(String url, String username, String password) {
+    public PaymentProcessorService(String url,
+                                   String username,
+                                   String password) {
         this.webClient = WebClient.builder()
                 .baseUrl(url)
                 .filter(ExchangeFilterFunctions.basicAuthentication(username, password))
