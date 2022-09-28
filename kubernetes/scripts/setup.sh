@@ -2,7 +2,7 @@
 
 set -e -o pipefail
 
-export VAULT_ADDR=$(minikube service vault --url | head -n 1)
+export VAULT_ADDR=$(minikube service vault -n vault --url | head -n 1)
 export VAULT_TOKEN='some-root-token'
 
 until vault status
@@ -17,7 +17,7 @@ vault kv put payments/secrets/processor 'username=payments-app' 'password=paymen
 
 vault write payments/database/config/payments \
 	 	plugin_name=postgresql-database-plugin \
-	 	connection_url='postgresql://{{username}}:{{password}}@payments-database:5432/payments' \
+	 	connection_url='postgresql://{{username}}:{{password}}@payments-database.default:5432/payments' \
 	 	allowed_roles="payments-app" \
 	 	username="postgres" \
 	 	password="postgres-admin-password"
@@ -54,4 +54,15 @@ vault write auth/kubernetes/role/payments-app \
      bound_service_account_names=payments-app \
      bound_service_account_namespaces=default \
      policies=payments \
+     ttl=24h
+
+
+## For CSI to Retrieve
+
+vault policy write payments-processor ../vault/static-policy.hcl
+
+vault write auth/kubernetes/role/payments-processor \
+     bound_service_account_names=payments-processor \
+     bound_service_account_namespaces=default \
+     policies=payments-processor \
      ttl=24h

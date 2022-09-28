@@ -1,0 +1,89 @@
+---
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name: payments-processor
+spec:
+  provider: vault
+  parameters:
+    roleName: 'payments-processor'
+    vaultAddress: 'http://vault.vault:8200'
+    objects: |
+      - objectName: "payments-processor-password"
+        secretPath: "payments/secrets/data/processor"
+        secretKey: "password"
+  secretObjects:
+    - secretName: payments-processor-password
+      type: Opaque
+      data:
+        - objectName: payments-processor-password
+          key: password
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: payments-processor
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: payments-processor
+  annotations:
+    kubernetes.io/service-account.name: "payments-processor"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-processor
+  labels:
+    app: payments-processor
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 30080
+  selector:
+    app: payments-processor
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-processor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: payments-processor
+      app: payments-processor
+  template:
+    metadata:
+      labels:
+        service: payments-processor
+        app: payments-processor
+    spec:
+      serviceAccountName: payments-processor
+      containers:
+        - name: payments-processor
+          image: payments-processor
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: payments-processor-password
+                  key: password
+          volumeMounts:
+            - name: vault
+              mountPath: '/mnt/secrets-store'
+              readOnly: true
+      volumes:
+        - name: vault
+          csi:
+            driver: 'secrets-store.csi.k8s.io'
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: 'payments-processor'
