@@ -1,5 +1,18 @@
 ---
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: payments-database
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/service-account-token
+metadata:
+  name: payments-database
+  annotations:
+    kubernetes.io/service-account.name: "payments-database"
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: payments-database

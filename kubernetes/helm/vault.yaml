@@ -5,3 +5,6 @@ server:
   dev:
     enabled: true
     devRootToken: "some-root-token"
+
+csi:
+  enabled: true

@@ -2,8 +2,7 @@
 
 set -e -o pipefail
 
-minikube config set vm-driver virtualbox
-minikube start
+minikube start --driver=virtualbox
 
 eval $(minikube -p minikube docker-env)
 cd ../payments-database && docker build -t payments-database .
