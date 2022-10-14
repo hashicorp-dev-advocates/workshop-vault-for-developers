@@ -15,7 +15,7 @@ do
     sleep 5
 done
 
-until docker exec -it workshop-vault-for-developers_payments-database_1 psql -Upostgres -a payments -c 'SELECT * FROM payments;'
+until docker exec -it workshop-vault-for-developers-payments-database-1 psql -Upostgres -a payments -c 'SELECT * FROM payments;'
 do
     sleep 5
 done
