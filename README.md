@@ -23,7 +23,7 @@ Write an application that...
 ## Prerequisites
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop/) v4.11.1
-- [Vault CLI](https://www.vaultproject.io/docs/install) v1.11.1+
+- [Vault CLI](https://www.vaultproject.io/docs/install) v1.13.2+
 - [Kubernetes](https://kubernetes.io/docs/tasks/tools/#kubectl) v1.24.3+
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) v1.26.1+
 
@@ -64,6 +64,13 @@ Run the commands in order...
 
 For Docker-only (mostly for in-depth examination), you can review
 the tasks in the `docker-compose/Makefile` directory.
+
+
+Run the commands in order...
+
+1. `make setup`
+1. `make agent`
+1. `make java`
 
 ### Clean Up
 
