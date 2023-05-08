@@ -60,11 +60,16 @@ Run the commands in order...
 1. `make setup`
 1. `make java`
 
+To issue API calls, you can use the Postman collection. However, you'll need
+to update the `Environment` to use Minikube's tunnel addresses if you are on Mac.
+
+Run `minikube service payments-app --url`. It will output the URL for the tunnel
+that routes to `localhost`.
+
 ### Docker Compose
 
 For Docker-only (mostly for in-depth examination), you can review
 the tasks in the `docker-compose/Makefile` directory.
-
 
 Run the commands in order...
 

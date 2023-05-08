@@ -25,6 +25,8 @@ clean-cluster:
 	kubectl delete --ignore-not-found -f applications/
 	helm del vault --namespace vault
 	helm del csi --namespace kube-system
+	kill -9 $(shell cat pidfile)
+	rm -rf pidfile
 
 clean-minikube:
 	minikube delete

@@ -2,7 +2,14 @@
 
 set -e -o pipefail
 
-export VAULT_ADDR=$(minikube service vault -n vault --url | head -n 1)
+kubectl apply -n vault -f vault/
+
+kubectl rollout -n vault status deployment/vault-agent-injector
+
+kubectl port-forward -n vault svc/vault 8200:8200 &
+pgrep kubectl > pidfile
+
+export VAULT_ADDR="http://localhost:8200"
 export VAULT_TOKEN='some-root-token'
 
 until vault status
@@ -34,21 +41,17 @@ vault write -f transit/keys/payments-app
 
 vault policy write payments ../vault/policy.hcl
 
-export SA_SECRET_NAME=$(kubectl get secrets --output=json \
-    | jq -r '.items[].metadata | select(.name|startswith("vault-token-")).name')
-export SA_JWT_TOKEN=$(kubectl get secret $SA_SECRET_NAME \
-    --output 'go-template={{ .data.token }}' | base64 --decode)
+export SA_JWT_TOKEN=$(kubectl get secret -n vault vault-auth -o go-template='{{ .data.token }}' | base64 --decode)
 export SA_CA_CRT=$(kubectl config view --raw --minify --flatten \
     --output 'jsonpath={.clusters[].cluster.certificate-authority-data}' | base64 --decode)
-export K8S_HOST=$(kubectl config view --raw --minify --flatten \
-    --output 'jsonpath={.clusters[].cluster.server}')
+export K8S_HOST=https://$(kubectl get svc kubernetes --output 'jsonpath={.spec.clusterIP}'):443
 
 vault auth enable kubernetes
 vault write auth/kubernetes/config \
      token_reviewer_jwt="${SA_JWT_TOKEN}" \
      kubernetes_host="${K8S_HOST}" \
      kubernetes_ca_cert="${SA_CA_CRT}" \
-     disable_iss_validation=true
+     issuer="https://kubernetes.default.svc.cluster.local"
 
 vault write auth/kubernetes/role/payments-app \
      bound_service_account_names=payments-app \
