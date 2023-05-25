@@ -82,6 +82,8 @@ spec:
           env:
             - name: VAULT_ADDR
               value: http://vault:8200
+            - name: spring_profiles_active
+              value: agent
           livenessProbe:
             httpGet:
               path: /actuator/health

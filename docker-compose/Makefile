@@ -9,6 +9,9 @@ agent:
 java:
 	docker compose -p $(PROJECT_NAME) -f docker-compose-java.yml up -d --build
 
+java-sdk:
+	docker compose -p $(PROJECT_NAME) -f docker-compose-java-sdk.yml up -d --build
+
 clean:
 	docker compose -p $(PROJECT_NAME) down || true
 	rm -rf vault-agent/
