@@ -16,7 +16,7 @@ services:
     environment:
       VAULT_ADDR: "http://vault:8200"
       CONFIG_HOME: "/root/config"
-      spring_profiles_active: "agent"
+      spring_profiles_active: "sdk"
 
 networks:
   vpcbr:

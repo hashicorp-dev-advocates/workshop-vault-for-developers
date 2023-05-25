@@ -21,9 +21,13 @@ do
 done
 
 vault secrets enable -path='payments/database' database
-vault secrets enable -path='payments/secrets' -version=2 kv
 
+# For Vault agent
+vault secrets enable -path='payments/secrets' -version=2 kv
 vault kv put payments/secrets/processor 'username=payments-app' 'password=payments-admin-password'
+
+# For Spring Cloud Vault
+vault kv put secret/payments-app 'payment.processor.username=payments-app' 'payment.processor.password=payments-admin-password'
 
 vault write payments/database/config/payments \
 	 	plugin_name=postgresql-database-plugin \
