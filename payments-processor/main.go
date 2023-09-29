@@ -22,6 +22,10 @@ type payment struct {
 	Status         string `json:"status,omitempty"`
 }
 
+func health(c *gin.Context) {
+	c.Status(http.StatusNoContent)
+}
+
 func postPayment(c *gin.Context) {
 	var newPayment payment
 
@@ -51,6 +55,8 @@ func main() {
 	}
 
 	router := gin.Default()
+
+	router.GET("/health", health)
 
 	authorized := router.Group("/", gin.BasicAuth(gin.Accounts{
 		*adminUsername: *adminPassword,
