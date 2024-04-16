@@ -23,7 +23,7 @@ Write an application that...
 ## Prerequisites
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop/) v4.11.1
-- [Vault CLI](https://www.vaultproject.io/docs/install) v1.13.2+
+- [Vault CLI](https://www.vaultproject.io/docs/install) v1.16.1+
 - [Kubernetes](https://kubernetes.io/docs/tasks/tools/#kubectl) v1.24.3+
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) v1.26.1+
 
