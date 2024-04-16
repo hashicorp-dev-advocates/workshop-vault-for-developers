@@ -7,11 +7,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.vault.core.VaultOperations;
 
 import javax.sql.DataSource;
 
 @SpringBootApplication
+@EnableScheduling
 @EnableConfigurationProperties(PaymentAppProperties.class)
 public class PaymentsApplication {
 

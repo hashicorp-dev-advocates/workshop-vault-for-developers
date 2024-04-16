@@ -14,7 +14,6 @@ Write an application that...
    1. Refactor application to reload
    1. Configure Vault agent to reload application
 
-
 1. Encrypts data in memory using secrets
    management.
    1. Install Vault SDK for application
@@ -23,7 +22,7 @@ Write an application that...
 ## Prerequisites
 
 - [Docker for Desktop](https://www.docker.com/products/docker-desktop/) v4.11.1
-- [Vault CLI](https://www.vaultproject.io/docs/install) v1.13.2+
+- [Vault CLI](https://www.vaultproject.io/docs/install) v1.16.1+
 - [Kubernetes](https://kubernetes.io/docs/tasks/tools/#kubectl) v1.24.3+
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/) v1.26.1+
 
@@ -71,11 +70,22 @@ that routes to `localhost`.
 For Docker-only (mostly for in-depth examination), you can review
 the tasks in the `docker-compose/Makefile` directory.
 
+#### Vault Agent Approach
+
 Run the commands in order...
 
 1. `make setup`
-1. `make agent`
 1. `make java`
+
+#### Spring Cloud Vault Approach
+
+This uses Spring Cloud Vault configuration to inject secrets and refreshes
+the database connection and processor sessions on an interval.
+
+Run the commands in order...
+
+1. `make setup`
+1. `make java-sdk`
 
 ### Clean Up
 

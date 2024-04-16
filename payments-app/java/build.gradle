@@ -17,7 +17,6 @@ apply plugin: 'io.spring.javaformat'
 
 group = 'com.hashicorp-dev-advocates'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '18'
 
 repositories {
 	mavenCentral()
@@ -39,6 +38,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
 	implementation 'org.springframework.cloud:spring-cloud-vault-config'
+	implementation 'org.springframework.cloud:spring-cloud-vault-config-databases'
 	implementation 'org.projectlombok:lombok'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
