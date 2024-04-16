@@ -14,7 +14,6 @@ Write an application that...
    1. Refactor application to reload
    1. Configure Vault agent to reload application
 
-
 1. Encrypts data in memory using secrets
    management.
    1. Install Vault SDK for application
@@ -71,11 +70,22 @@ that routes to `localhost`.
 For Docker-only (mostly for in-depth examination), you can review
 the tasks in the `docker-compose/Makefile` directory.
 
+#### Vault Agent Approach
+
 Run the commands in order...
 
 1. `make setup`
-1. `make agent`
 1. `make java`
+
+#### Spring Cloud Vault Approach
+
+This uses Spring Cloud Vault configuration to inject secrets and refreshes
+the database connection and processor sessions on an interval.
+
+Run the commands in order...
+
+1. `make setup`
+1. `make java-sdk`
 
 ### Clean Up
 
