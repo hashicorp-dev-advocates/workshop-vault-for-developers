@@ -26,7 +26,7 @@ services:
     volumes:
       - ./vault-agent:/root:r
     entrypoint: ["/bin/sh"]
-    command: ["-c", "export VAULT_TOKEN=$$(cat /root/.vault-token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
+    command: ["-c", "export VAULT_TOKEN=$$(cat /root/.vault-token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/app.jar"]
     environment:
       VAULT_ADDR: "http://vault:8200"
       CONFIG_HOME: "/root/config"
