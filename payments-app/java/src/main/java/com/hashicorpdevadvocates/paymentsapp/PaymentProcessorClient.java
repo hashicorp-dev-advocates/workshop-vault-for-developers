@@ -7,9 +7,7 @@ import reactor.core.publisher.Mono;
 
 class PaymentProcessorClient {
 
-	private final String URI_SUBMIT = "/submit";
-
-	private WebClient webClient;
+	private final WebClient webClient;
 
 	public PaymentProcessorClient(String url, String username, String password) {
 		this.webClient = WebClient.builder().baseUrl(url)
@@ -19,9 +17,11 @@ class PaymentProcessorClient {
 	public ResponseEntity<Payment> submitPayment(String name, String billingAddress) {
 		PaymentRequest request = new PaymentRequest(name, billingAddress);
 		final HttpStatus[] status = new HttpStatus[1];
-		Payment paid = webClient.post().uri(URI_SUBMIT).body(Mono.just(request), PaymentRequest.class)
+		String URI_SUBMIT = "/submit";
+		Payment paid = webClient.post().uri(URI_SUBMIT).body(
+				Mono.just(request), PaymentRequest.class)
 				.exchangeToMono(response -> {
-					status[0] = response.statusCode();
+					status[0] = (HttpStatus) response.statusCode();
 					return response.bodyToMono(Payment.class);
 				}).block();
 		return new ResponseEntity<>(paid, status[0]);

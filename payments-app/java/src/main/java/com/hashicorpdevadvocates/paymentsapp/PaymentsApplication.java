@@ -8,7 +8,6 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.vault.core.VaultOperations;
 
 import javax.sql.DataSource;
 
@@ -33,17 +32,6 @@ public class PaymentsApplication {
 	PaymentProcessorClient paymentProcessorClient(PaymentAppProperties properties) {
 		return new PaymentProcessorClient(properties.getProcessor().getUrl(), properties.getProcessor().getUsername(),
 				properties.getProcessor().getPassword());
-	}
-
-	@Bean
-	PaymentService paymentService(PaymentRepository repository, VaultTransit transit,
-			PaymentProcessorClient paymentProcessorClient) {
-		return new PaymentService(repository, transit, paymentProcessorClient);
-	}
-
-	@Bean
-	VaultTransit vaultTransit(VaultOperations vo, PaymentAppProperties properties) {
-		return new VaultTransit(vo, properties.getTransit().getPath(), properties.getTransit().getKey());
 	}
 
 }

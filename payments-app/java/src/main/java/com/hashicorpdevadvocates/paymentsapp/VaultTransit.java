@@ -1,23 +1,24 @@
 package com.hashicorpdevadvocates.paymentsapp;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.vault.core.VaultOperations;
+import org.springframework.vault.core.VaultTemplate;
 
-@RequiredArgsConstructor
-class VaultTransit {
+public class VaultTransit {
+    private final VaultOperations vault;
+    private final String path;
+    private final String key;
 
-	private final VaultOperations vault;
+    VaultTransit(PaymentAppProperties properties, VaultTemplate vaultTemplate) {
+        this.vault = vaultTemplate;
+        this.path = properties.getTransit().getPath();
+        this.key = properties.getTransit().getKey();
+    }
 
-	private final String path;
+    String decrypt(String payload) {
+        return vault.opsForTransit(path).decrypt(key, payload);
+    }
 
-	private final String key;
-
-	String decrypt(String billingAddress) {
-		return vault.opsForTransit(path).decrypt(key, billingAddress);
-	}
-
-	String encrypt(String billingAddress) {
-		return vault.opsForTransit(path).encrypt(key, billingAddress);
-	}
-
+    String encrypt(String payload) {
+        return vault.opsForTransit(path).encrypt(key, payload);
+    }
 }

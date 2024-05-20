@@ -1,19 +1,14 @@
 package com.hashicorpdevadvocates.paymentsapp;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.cloud.context.config.annotation.RefreshScope;
 
-@RefreshScope
 @ConfigurationProperties(prefix = "payment")
-@Data
 class PaymentAppProperties {
 
 	private Processor processor = new Processor();
 
 	private Transit transit = new Transit();
 
-	@Data
 	static class Processor {
 
 		private String url;
@@ -22,15 +17,70 @@ class PaymentAppProperties {
 
 		private String password;
 
+		public String getUrl() {
+			return url;
+		}
+
+		public void setUrl(String url) {
+			this.url = url;
+		}
+
+		public String getUsername() {
+			return username;
+		}
+
+		public void setUsername(String username) {
+			this.username = username;
+		}
+
+		public String getPassword() {
+			return password;
+		}
+
+		public void setPassword(String password) {
+			this.password = password;
+		}
 	}
 
-	@Data
+	public Processor getProcessor() {
+		return processor;
+	}
+
+	public void setProcessor(Processor processor) {
+		this.processor = processor;
+	}
+
+
 	static class Transit {
 
-		private String path = "transit";
+		public String getPath() {
+			return path;
+		}
 
-		private String key = "payments-app";
+		public void setPath(String path) {
+			this.path = path;
+		}
 
+		public String getKey() {
+			return key;
+		}
+
+		public void setKey(String key) {
+			this.key = key;
+		}
+
+		private String path;
+
+		private String key;
+
+	}
+
+	public Transit getTransit() {
+		return transit;
+	}
+
+	public void setTransit(Transit transit) {
+		this.transit = transit;
 	}
 
 }
