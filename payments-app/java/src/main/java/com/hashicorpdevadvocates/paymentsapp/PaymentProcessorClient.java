@@ -1,7 +1,6 @@
 package com.hashicorpdevadvocates.paymentsapp;
 
 import org.springframework.http.*;
-import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -9,9 +8,8 @@ class PaymentProcessorClient {
 
 	private final WebClient webClient;
 
-	public PaymentProcessorClient(String url, String username, String password) {
-		this.webClient = WebClient.builder().baseUrl(url)
-				.filter(ExchangeFilterFunctions.basicAuthentication(username, password)).build();
+	public PaymentProcessorClient(WebClient client) {
+		this.webClient = client;
 	}
 
 	public ResponseEntity<Payment> submitPayment(String name, String billingAddress) {

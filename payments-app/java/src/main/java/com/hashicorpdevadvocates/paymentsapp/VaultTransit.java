@@ -8,7 +8,7 @@ public class VaultTransit {
     private final String path;
     private final String key;
 
-    VaultTransit(PaymentAppProperties properties, VaultTemplate vaultTemplate) {
+    VaultTransit(PaymentsAppProperties properties, VaultTemplate vaultTemplate) {
         this.vault = vaultTemplate;
         this.path = properties.getTransit().getPath();
         this.key = properties.getTransit().getKey();

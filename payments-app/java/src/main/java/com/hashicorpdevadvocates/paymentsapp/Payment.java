@@ -6,6 +6,6 @@ import java.time.Instant;
 record Payment(String id,
 			   String name,
 			   @JsonProperty(value = "billing_address") String billingAddress,
-			   Instant createdAt,
+			   @JsonProperty(value = "created_at") Instant createdAt,
 			   String status) {
 }

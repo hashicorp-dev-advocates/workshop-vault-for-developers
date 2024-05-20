@@ -1,10 +1,14 @@
 package com.hashicorpdevadvocates.paymentsapp;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Controller;
+import org.springframework.vault.core.VaultTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.sql.DataSource;
 import java.time.Instant;
@@ -18,11 +22,13 @@ class PaymentController {
 	private final PaymentProcessorClient paymentProcessor;
 	private final VaultTransit vaultTransit;
 
-	PaymentController(DataSource dataSource, PaymentProcessorClient paymentProcessor,
-					  VaultTransit vaultTransit) {
+	PaymentController(DataSource dataSource,
+					  WebClient client,
+					  PaymentsAppProperties paymentsAppProperties,
+					  VaultTemplate vaultTemplate) {
 		this.db = JdbcClient.create(dataSource);
-		this.paymentProcessor = paymentProcessor;
-		this.vaultTransit = vaultTransit;
+		this.paymentProcessor = new PaymentProcessorClient(client);
+		this.vaultTransit = new VaultTransit(paymentsAppProperties, vaultTemplate);
 	}
 
 	@GetMapping("/payments")
@@ -39,14 +45,16 @@ class PaymentController {
 				.list();
 	}
 
-	@GetMapping("/payments")
-	Collection<Payment> getPaymentByID(String id) {
+	@GetMapping("/payments/{id}")
+	Collection<Payment> getPaymentByID(@PathVariable String id) {
 		return this.db
 				.sql(String.format("SELECT * FROM payments WHERE id = '%s'", id))
 				.query((rs, rowNum) -> new Payment(
 						rs.getString("id"),
 						rs.getString("name"),
-						vaultTransit.decrypt(rs.getString("billing_address")),
+						rs.getString("billing_address").startsWith("vault") ?
+								vaultTransit.decrypt(rs.getString("billing_address")) :
+								rs.getString("billing_address"),
 						rs.getTimestamp("created_at").toInstant(),
 						rs.getString("status")
 				)).list();
@@ -57,6 +65,7 @@ class PaymentController {
 			produces = MediaType.APPLICATION_JSON_VALUE)
 	Collection<Payment> createPayment(@RequestBody Payment request) {
 		var id = UUID.randomUUID().toString();
+		var timestamp = Instant.now();
 
 		ResponseEntity<Payment> paid = paymentProcessor.submitPayment(
 				request.name(),
@@ -70,12 +79,21 @@ class PaymentController {
 					id,
 					paymentComplete.name(),
 					paymentComplete.billingAddress(),
-					Instant.now().toString(),
+					timestamp.toString(),
 					paymentComplete.status());
 			this.db.sql(statement).update();
 		} else {
-			return Collections.singletonList(paid.getBody());
+			throw new ResponseStatusException(
+					HttpStatus.INTERNAL_SERVER_ERROR, "could not process payment");
 		}
-		return getPaymentByID(id);
+		return this.db
+				.sql(String.format("SELECT * FROM payments WHERE id = '%s'", id))
+				.query((rs, rowNum) -> new Payment(
+						rs.getString("id"),
+						rs.getString("name"),
+						vaultTransit.decrypt(rs.getString("billing_address")),
+						rs.getTimestamp("created_at").toInstant(),
+						rs.getString("status")
+				)).list();
 	}
 }
