@@ -1,5 +1,7 @@
 package com.hashicorpdevadvocates.paymentsapp;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -8,14 +10,17 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.cloud.context.config.annotation.RefreshScope;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.vault.core.VaultOperations;
+import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import javax.sql.DataSource;
 
 @SpringBootApplication
 @EnableScheduling
-@EnableConfigurationProperties(PaymentAppProperties.class)
+@EnableConfigurationProperties(PaymentsAppProperties.class)
 public class PaymentsApplication {
+
+	private final Log log = LogFactory.getLog(getClass());
 
 	public static void main(String[] args) {
 		SpringApplication.run(PaymentsApplication.class, args);
@@ -24,26 +29,34 @@ public class PaymentsApplication {
 	@Bean
 	@RefreshScope
 	DataSource dataSource(DataSourceProperties properties) {
-		return DataSourceBuilder.create().url(properties.getUrl()).username(properties.getUsername())
-				.password(properties.getPassword()).build();
+		log.info("rebuild database secrets: " +
+				properties.getUsername() +
+				"," +
+				properties.getPassword()
+		);
+
+		return DataSourceBuilder
+				.create()
+				.url(properties.getUrl())
+				.username(properties.getUsername())
+				.password(properties.getPassword())
+				.build();
 	}
 
 	@Bean
 	@RefreshScope
-	PaymentProcessorClient paymentProcessorClient(PaymentAppProperties properties) {
-		return new PaymentProcessorClient(properties.getProcessor().getUrl(), properties.getProcessor().getUsername(),
-				properties.getProcessor().getPassword());
+	WebClient processorClient(PaymentsAppProperties properties) {
+		log.info("rebuild processor secrets: " +
+				properties.getProcessor().getUsername() +
+				"," +
+				properties.getProcessor().getPassword()
+		);
+		return WebClient.builder()
+				.baseUrl(properties.getProcessor().getUrl())
+				.filter(
+						ExchangeFilterFunctions.basicAuthentication(
+								properties.getProcessor().getUsername(),
+								properties.getProcessor().getPassword()))
+				.build();
 	}
-
-	@Bean
-	PaymentService paymentService(PaymentRepository repository, VaultTransit transit,
-			PaymentProcessorClient paymentProcessorClient) {
-		return new PaymentService(repository, transit, paymentProcessorClient);
-	}
-
-	@Bean
-	VaultTransit vaultTransit(VaultOperations vo, PaymentAppProperties properties) {
-		return new VaultTransit(vo, properties.getTransit().getPath(), properties.getTransit().getKey());
-	}
-
 }

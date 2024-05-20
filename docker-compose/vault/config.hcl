@@ -34,6 +34,10 @@ auto_auth {
   }
 }
 
+template_config {
+  static_secret_render_interval = "1m"
+}
+
 // Use one template for database secrets and another for payment processor
 // secrets. This demonstration uses two templates to mimic how you would
 // configure the template files on Kubernetes using annotations.

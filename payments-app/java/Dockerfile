@@ -1,10 +1,9 @@
-FROM gradle:7.5-jdk18 AS build
-COPY --chown=gradle:gradle . /home/gradle/src
-WORKDIR /home/gradle/src
-RUN gradle clean build --no-daemon
+FROM maven:3.9-eclipse-temurin-22 AS build
+COPY pom.xml /app/
+COPY src /app/src
+RUN mvn -f /app/pom.xml clean package
 
-FROM eclipse-temurin:18
+FROM eclipse-temurin:22
 EXPOSE 8081
-RUN mkdir /app
-COPY --from=build /home/gradle/src/build/libs/*.jar /app/spring-boot-application.jar
-ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-Djava.security.egd=file:/dev/./urandom","-jar","/app/spring-boot-application.jar"]
+COPY --from=build /app/target/*.jar /app/app.jar
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-Djava.security.egd=file:/dev/./urandom","-jar","/app/app.jar"]

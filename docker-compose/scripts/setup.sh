@@ -8,7 +8,7 @@ export COMPOSE_PROJECT_NAME=workshop-vault-for-developers
 export VAULT_ADDR='http://127.0.0.1:8200'
 export VAULT_TOKEN='some-root-token'
 
-docker-compose up -d --build
+docker compose up -d --build
 
 until vault status; do
 	sleep 5
@@ -18,14 +18,17 @@ until docker exec -it workshop-vault-for-developers-payments-database-1 psql -Up
 	sleep 5
 done
 
-vault secrets enable -path='payments/database' database
-
 # For Vault agent
 vault secrets enable -path='payments/secrets' -version=2 kv
 vault kv put payments/secrets/processor 'username=payments-app' 'password=payments-admin-password'
 
 # For Spring Cloud Vault
 vault kv put secret/payments-app 'payment.processor.username=payments-app' 'payment.processor.password=payments-admin-password'
+vault kv put secret/payments-app/sdk ''
+vault kv put secret/application ''
+vault kv put secret/application/sdk ''
+
+vault secrets enable -path='payments/database' database
 
 vault write payments/database/config/payments \
 	plugin_name=postgresql-database-plugin \
@@ -38,8 +41,8 @@ vault write payments/database/roles/payments-app \
 	db_name=payments \
 	creation_statements="CREATE ROLE \"{{name}}\" WITH LOGIN PASSWORD '{{password}}' VALID UNTIL '{{expiration}}'; \
 		GRANT ALL PRIVILEGES ON payments TO \"{{name}}\";" \
-	default_ttl="2m" \
-	max_ttl="15m"
+	default_ttl="1m" \
+	max_ttl="2m"
 
 vault secrets enable transit
 vault write -f transit/keys/payments-app
