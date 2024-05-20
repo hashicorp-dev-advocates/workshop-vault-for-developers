@@ -9,3 +9,5 @@ payments-app/java/bin
 payments-app/java/src/*.iml
 
 kubernetes/pidfile
+
+docker-compose/certs

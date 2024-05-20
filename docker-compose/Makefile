@@ -11,4 +11,4 @@ java-sdk:
 
 clean:
 	bash scripts/cleanup.sh
-	rm -rf vault-agent/
+	rm -rf vault-agent/ certs/

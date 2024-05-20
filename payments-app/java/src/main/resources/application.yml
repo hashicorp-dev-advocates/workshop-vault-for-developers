@@ -1,0 +1,11 @@
+spring:
+  ssl:
+    bundle:
+      pem:
+        demo:
+          reload-on-update: true
+          keystore:
+            certificate: "/root/config/certs/payments.crt"
+            private-key: "/root/config/certs/payments.key"
+
+server.ssl.bundle: "demo"
