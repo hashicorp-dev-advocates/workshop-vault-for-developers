@@ -80,6 +80,12 @@ For the Spring Cloud Vault (code-based) example, run:
 $ make java-sdk
 ```
 
+To clean up, run:
+
+```shell
+$ make clean
+```
+
 ### Kubernetes
 
 For Kubernetes, you can review the tasks in the `kubernetes/Makefile` directory.
