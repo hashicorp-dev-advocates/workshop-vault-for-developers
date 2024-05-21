@@ -9,6 +9,13 @@ services:
       - ./vault-agent:/vault-agent:rw
     cap_add:
       - IPC_LOCK
+    healthcheck:
+      test: ["CMD", "test", "-d", "/vault-agent/config/certs"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+      start_interval: 5s
     networks:
       vpcbr:
         ipv4_address: 10.5.0.5
@@ -16,7 +23,8 @@ services:
   payments-app:
     build: ../payments-app/java
     depends_on:
-      - vault-agent
+      vault-agent:
+        condition: service_healthy
     image: payments-app:java
     networks:
       vpcbr:

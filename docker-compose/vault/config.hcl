@@ -38,6 +38,11 @@ template_config {
   static_secret_render_interval = "1m"
 }
 
+template {
+  source       = "/vault/templates/cert.tpl"
+  destination  = "/vault-agent/config/all-certs"
+}
+
 // Use one template for database secrets and another for payment processor
 // secrets. This demonstration uses two templates to mimic how you would
 // configure the template files on Kubernetes using annotations.
@@ -51,7 +56,7 @@ template {
   // When Vault agent renders a new template (because a secret changed), run
   // a command to refresh the Spring Boot application.
   exec {
-    command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
+    command = ["wget -qO- --no-check-certificate --header='Content-Type:application/json' --post-data='{}' https://payments-app:8081/actuator/refresh"]
     timeout = "30s"
   }
 }
@@ -65,7 +70,7 @@ template {
   // When Vault agent renders a new template (because a secret changed), run
   // a command to refresh the Spring Boot application.
   exec {
-    command = ["wget -qO- --header='Content-Type:application/json' --post-data='{}' http://payments-app:8081/actuator/refresh"]
+    command = ["wget -qO- --no-check-certificate --header='Content-Type:application/json' --post-data='{}' https://payments-app:8081/actuator/refresh"]
     timeout = "30s"
   }
 }

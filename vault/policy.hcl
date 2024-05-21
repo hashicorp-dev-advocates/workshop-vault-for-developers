@@ -17,3 +17,7 @@ path "transit/encrypt/payments-app" {
 path "transit/decrypt/payments-app" {
   capabilities = ["update"]
 }
+
+path "pki_int/issue/payments-app" {
+  capabilities = ["update"]
+}

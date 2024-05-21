@@ -6,11 +6,10 @@ metadata:
   labels:
     app: payments-app
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 8081
       targetPort: 8081
-      nodePort: 30081
   selector:
     app: payments-app
 ---
@@ -47,7 +46,16 @@ spec:
         vault.hashicorp.com/role: "payments-app"
         vault.hashicorp.com/agent-inject-token: "true"
         vault.hashicorp.com/agent-cache-enable: "true" # Use cached secrets and lease from vault-agent initialization to agent
-        vault.hashicorp.com/template-static-secret-render-interval: "5m" # Defaults to 5 minutes, update if you want static secrets checked more frequently
+        vault.hashicorp.com/template-static-secret-render-interval: "3m" # Defaults to 5 minutes, update if you want static secrets checked more frequently
+
+        vault.hashicorp.com/secret-volume-path-certs: "/vault/secrets/certs"
+        vault.hashicorp.com/agent-inject-secret-certs: "pki_int/issue/payments-app"
+        vault.hashicorp.com/agent-inject-template-certs: |
+          {{- with pkiCert "pki_int/issue/payments-app" "common_name=payments.hashicorpdevadvocates.com" -}}
+          {{ .Cert }}{{ .Key }}
+          {{ .Cert | trimSpace | writeToFile "/vault/secrets/certs/payments.crt" "vault" "vault" "0644" }}
+          {{ .Key | trimSpace | writeToFile "/vault/secrets/certs/payments.key" "vault" "vault" "0644" }}
+          {{- end }}
 
         vault.hashicorp.com/agent-inject-secret-processor.properties: "payments/secrets/data/processor"
         vault.hashicorp.com/agent-inject-template-processor.properties: |
@@ -57,7 +65,7 @@ spec:
           payment.processor.password={{ .Data.data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-processor.properties: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
+          wget -qO- --no-check-certificate --header='Content-Type:application/json' --post-data='{}' https://127.0.0.1:8081/actuator/refresh || true
 
         vault.hashicorp.com/agent-inject-secret-database.properties: "payments/database/creds/payments-app"
         vault.hashicorp.com/agent-inject-template-database.properties: |
@@ -67,7 +75,7 @@ spec:
           spring.datasource.password={{ .Data.password }}
           {{- end }}
         vault.hashicorp.com/agent-inject-command-database.properties: |
-          wget -qO- --header='Content-Type:application/json' --post-data='{}' http://127.0.0.1:8081/actuator/refresh
+          wget -qO- --no-check-certificate --header='Content-Type:application/json' --post-data='{}' https://127.0.0.1:8081/actuator/refresh || true
 
     spec:
       serviceAccountName: payments-app
@@ -78,7 +86,7 @@ spec:
           ports:
             - containerPort: 8081
           command: ["/bin/sh"]
-          args: ["-c", "export VAULT_TOKEN=$(cat /vault/secrets/token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/spring-boot-application.jar"]
+          args: ["-c", "export VAULT_TOKEN=$(cat /vault/secrets/token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/app.jar"]
           env:
             - name: VAULT_ADDR
               value: http://vault.vault:8200
