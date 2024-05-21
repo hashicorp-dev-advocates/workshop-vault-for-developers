@@ -50,6 +50,36 @@ Write an application that...
 
 ## Usage
 
+### Docker Compose
+
+For Docker-only (mostly for in-depth examination), you can review
+the tasks in the `docker-compose/Makefile` directory.
+
+Go into the `docker-compose/` directory.
+
+```shell
+$ cd docker-compose
+```
+
+Set up the Vault server, application database, and payments-processor
+application.
+
+```shell
+$ make setup
+```
+
+For the Vault agent example, run:
+
+```shell
+$ make java
+```
+
+For the Spring Cloud Vault (code-based) example, run:
+
+```shell
+$ make java-sdk
+```
+
 ### Kubernetes
 
 For Kubernetes, you can review the tasks in the `kubernetes/Makefile` directory.
