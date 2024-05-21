@@ -68,13 +68,13 @@ application.
 $ make setup
 ```
 
-For the Vault agent example, run:
+For the **Vault agent** example, run:
 
 ```shell
 $ make java
 ```
 
-For the Spring Cloud Vault (code-based) example, run:
+For the **Spring Cloud Vault (code-based)** example, run:
 
 ```shell
 $ make java-sdk
@@ -90,38 +90,40 @@ $ make clean
 
 For Kubernetes, you can review the tasks in the `kubernetes/Makefile` directory.
 
-Run the commands in order...
+> NOTE: The Kubernetes deployment uses a Vault agent approach instead
+> of a programming language.
 
-1. `make setup`
-1. `make java`
+Go into the `kubernetes/` directory.
+
+```shell
+$ cd kubernetes
+```
+
+Set up the Vault server, application database, and payments-processor
+application.
+
+```shell
+$ make setup
+```
+
+For the **SIGTERM**-based approach (framework doesn't have a refresh capability),
+run:
+
+```shell
+$ make java-sigterm
+```
+
+For the refresh API endpoint approach, run:
+
+```shell
+$ make java
+```
 
 To issue API calls, you can use the Postman collection. However, you'll need
 to update the `Environment` to use Minikube's tunnel addresses if you are on Mac.
 
 Run `minikube service payments-app --url`. It will output the URL for the tunnel
 that routes to `localhost`.
-
-### Docker Compose
-
-For Docker-only (mostly for in-depth examination), you can review
-the tasks in the `docker-compose/Makefile` directory.
-
-#### Vault Agent Approach
-
-Run the commands in order...
-
-1. `make setup`
-1. `make java`
-
-#### Spring Cloud Vault Approach
-
-This uses Spring Cloud Vault configuration to inject secrets and refreshes
-the database connection and processor sessions on an interval.
-
-Run the commands in order...
-
-1. `make setup`
-1. `make java-sdk`
 
 ### Clean Up
 
