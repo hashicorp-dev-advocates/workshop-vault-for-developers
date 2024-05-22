@@ -16,6 +16,7 @@
 	<properties>
 		<java.version>22</java.version>
 		<spring-cloud.version>2023.0.1</spring-cloud.version>
+		<aws.java.sdk.version>2.25.57</aws.java.sdk.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -56,6 +57,13 @@
 	</dependencies>
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>software.amazon.awssdk</groupId>
+				<artifactId>bom</artifactId>
+				<version>${aws.java.sdk.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 			<dependency>
 				<groupId>org.springframework.cloud</groupId>
 				<artifactId>spring-cloud-dependencies</artifactId>

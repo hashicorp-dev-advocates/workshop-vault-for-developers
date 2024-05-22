@@ -11,3 +11,5 @@ payments-app/java/src/*.iml
 kubernetes/pidfile
 
 certs/
+
+tmp.json
