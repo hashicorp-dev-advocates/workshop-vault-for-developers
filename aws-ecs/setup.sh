@@ -1,27 +1,28 @@
 #!/bin/bash
 
-cd infrastructure && terraform output -json database > tmp.json
-
-export PGUSER=$(jq -r '.username' tmp.json)
-export PGPASSWORD=$(jq -r '.password' tmp.json)
-export PGDATABASE=$(jq -r '.db_name' tmp.json)
-export PGHOST=$(jq -r '.address' tmp.json)
-
-PAYMENT_PROCESSOR=$(terraform output -json ecr | jq  -r '.payments_processor')
-PAYMENT_APP=$(terraform output -json ecr | jq  -r '.payments_app')
-
-cd ..
+export PGUSER=$(cd infrastructure && terraform output -raw database_username)
+export PGPASSWORD="$(cd infrastructure && terraform output -raw database_password)"
+export PGDATABASE=$(cd infrastructure && terraform output -raw database_name)
+export PGHOST=$(cd infrastructure && terraform output -raw database_hostname)
 
 psql -f database/setup.sql
 
-export VAULT_ADDR=$(cd infrastructure && terraform output -json vault | jq -r '.public_endpoint')
-export VAULT_NAMESPACE=$(cd infrastructure && terraform output -json vault | jq -r '.namespace')
-export VAULT_TOKEN=$(cd vault && terraform output -raw vault_token)
+PAYMENT_PROCESSOR_IMAGE=$(cd infrastructure && terraform output -json ecr | jq  -r '.payments_processor')
+PAYMENT_APP_IMAGE=$(cd infrastructure && terraform output -json ecr | jq  -r '.payments_app')
+VAULT_AGENT_IMAGE=$(cd infrastructure && terraform output -json ecr | jq  -r '.vault_agent')
 
-cd ../payments-processor
-docker build -t ${PAYMENT_PROCESSOR} .
-docker push ${PAYMENT_PROCESSOR}
+export VAULT_ADDR=$(cd infrastructure && terraform output -raw hcp_vault_public_endpoint)
+export VAULT_NAMESPACE=admin
+export VAULT_TOKEN=$(cd infrastructure && terraform output -raw hcp_vault_admin_token)
+
+cd vault-agent
+docker build -t ${VAULT_AGENT_IMAGE}:1.16 .
+docker push ${VAULT_AGENT_IMAGE}
+
+cd ../../payments-processor
+docker build -t ${PAYMENT_PROCESSOR_IMAGE}:1.0 .
+docker push ${PAYMENT_PROCESSOR_IMAGE}
 
 cd ../payments-app/java
-docker build -t ${PAYMENT_APP}:1.0 .
-docker push ${PAYMENT_APP}:1.0
+docker build -t ${PAYMENT_APP_IMAGE}:1.0 .
+docker push ${PAYMENT_APP_IMAGE}:1.0

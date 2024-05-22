@@ -21,14 +21,10 @@ resource "aws_db_instance" "payments" {
   vpc_security_group_ids = [aws_security_group.database.id]
 }
 
-data "aws_vpc" "selected" {
-  default = true
-}
-
 resource "aws_security_group" "database" {
   name        = "payments-database"
   description = "Security group for payments database"
-  vpc_id      = data.aws_vpc.selected.id
+  vpc_id      = module.vpc.default_vpc_default_security_group_id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "machine_to_database" {

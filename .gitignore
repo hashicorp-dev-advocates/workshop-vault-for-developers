@@ -1,4 +1,4 @@
-vault-agent/
+docker-compose/vault-agent/
 
 payments-app/test/.gradle
 payments-app/test/build

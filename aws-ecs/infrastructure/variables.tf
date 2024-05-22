@@ -1,51 +1,51 @@
 variable "name" {
   type        = string
-  description = "AWS resource name"
+  description = "Name for infrastructure resources"
+  default     = "learn"
+}
+
+variable "tags" {
+  type        = map(string)
+  description = "Tags to add to infrastructure resources"
+  default     = {}
 }
 
 variable "region" {
   type        = string
   description = "AWS Region"
-
+  default     = "us-east-1"
   validation {
-    condition     = can(regex("^us-", var.region))
-    error_message = "AWS Region must be in United States"
+    condition     = contains(["us-east-1", "us-west-2"], var.region)
+    error_message = "Region must be a valid one for HCP."
   }
-
-}
-
-variable "hcp_project" {
-  type        = string
-  description = "HCP Project"
-}
-
-variable "hcp_region" {
-  type        = string
-  default     = ""
-  description = "HCP Region"
 }
 
 variable "vpc_cidr_block" {
   type        = string
+  description = "VPC CIDR Block"
   default     = "10.0.0.0/16"
-  description = "CIDR Block for VPC"
 }
 
-variable "hcp_cidr_block" {
+variable "hcp_project" {
   type        = string
-  default     = "172.25.16.0/20"
-  description = "CIDR block of the HashiCorp Virtual Network"
+  description = "HCP Project ID"
 }
 
-variable "tags" {
-  type        = map(any)
-  description = "Tags to add resources"
-  default = {
-    Purpose = "workshop-vault-for-developers/aws-ecs"
-  }
+variable "hcp_network_cidr_block" {
+  type        = string
+  description = "HCP CIDR Block for HashiCorp Virtual Network"
+  default     = "172.25.16.0/20"
 }
 
 variable "client_cidr_block" {
-  type        = list(string)
-  description = "Client CIDR block"
+  type        = string
+  description = "CIDR Block to allow access to load balancer"
+  default     = "0.0.0.0/0"
+}
+
+locals {
+  tags = merge(var.tags, {
+    Service = "payments"
+    Purpose = "workshop-vault-for-developers"
+  })
 }

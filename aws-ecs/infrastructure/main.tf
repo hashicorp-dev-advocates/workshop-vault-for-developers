@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.50.0"
+      version = "~> 5.50"
     }
     hcp = {
       source  = "hashicorp/hcp"
@@ -14,7 +14,7 @@ terraform {
 provider "aws" {
   region = var.region
   default_tags {
-    tags = var.tags
+    tags = local.tags
   }
 }
 
