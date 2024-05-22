@@ -26,7 +26,7 @@ data "terraform_remote_state" "infrastructure" {
 }
 
 provider "aws" {
-  region = var.region
+  region = data.terraform_remote_state.infrastructure.outputs.region
   default_tags {
     tags = var.tags
   }
@@ -36,12 +36,8 @@ provider "hcp" {
   project_id = var.hcp_project
 }
 
-resource "hcp_vault_cluster_admin_token" "cluster" {
-  cluster_id = data.terraform_remote_state.infrastructure.outputs.vault.id
-}
-
 provider "vault" {
-  address   = data.terraform_remote_state.infrastructure.outputs.vault.public_endpoint
-  namespace = data.terraform_remote_state.infrastructure.outputs.vault.namespace
-  token     = hcp_vault_cluster_admin_token.cluster.token
+  address   = data.terraform_remote_state.infrastructure.outputs.hcp_vault_public_endpoint
+  namespace = "admin"
+  token     = data.terraform_remote_state.infrastructure.outputs.hcp_vault_admin_token
 }

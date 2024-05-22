@@ -16,12 +16,13 @@ resource "vault_aws_auth_backend_config_identity" "identity_config" {
     "auth_type",
     "canonical_arn",
     "client_arn",
-  "client_user_id"]
+    "client_user_id"
+  ]
 }
 
 resource "vault_aws_auth_backend_role" "role" {
   backend                  = vault_auth_backend.aws.path
-  role                     = "payments-app"
+  role                     = var.application_name
   auth_type                = "iam"
   bound_iam_principal_arns = [aws_iam_role.vault_target_iam_role.arn]
   token_ttl                = 60
@@ -30,7 +31,7 @@ resource "vault_aws_auth_backend_role" "role" {
 }
 
 resource "vault_policy" "payments_app" {
-  name = "payments-app"
+  name = var.application_name
 
   policy = <<EOT
 path "secret/*" {

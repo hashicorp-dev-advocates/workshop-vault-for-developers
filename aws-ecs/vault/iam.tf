@@ -11,7 +11,23 @@ data "aws_iam_policy_document" "client_policy" {
     actions = ["sts:AssumeRole"]
     principals {
       type        = "Service"
-      identifiers = ["ec2.amazonaws.com"]
+      identifiers = ["ecs-tasks.amazonaws.com"]
+    }
+    condition {
+      test     = "ArnLike"
+      variable = "aws:SourceArn"
+
+      values = [
+        "arn:aws:ecs:${data.terraform_remote_state.infrastructure.outputs.region}:${data.aws_caller_identity.current.account_id}:*",
+      ]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+
+      values = [
+        data.aws_caller_identity.current.account_id,
+      ]
     }
   }
 }
