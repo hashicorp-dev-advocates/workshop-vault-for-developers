@@ -11,7 +11,7 @@ auto_auth {
 
   sink "file" {
     config = {
-      path = "/tmp/token"
+      path = "/config/token"
     }
   }
 }
@@ -22,7 +22,7 @@ listener "tcp" {
 }
 
 template_config {
-  static_secret_render_interval = "1m"
+  static_secret_render_interval = "5m"
 }
 
 // Use one template for database secrets and another for payment processor
