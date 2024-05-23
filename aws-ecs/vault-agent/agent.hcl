@@ -1,4 +1,3 @@
-exit_after_auth = VAULT_AGENT_EXIT_AFTER_AUTH
 pid_file        = "./pidfile"
 
 auto_auth {

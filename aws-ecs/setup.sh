@@ -16,7 +16,7 @@ export VAULT_NAMESPACE=admin
 export VAULT_TOKEN=$(cd infrastructure && terraform output -raw hcp_vault_admin_token)
 
 cd vault-agent
-docker build -t ${VAULT_AGENT_IMAGE}:1.16 .
+docker build -t ${VAULT_AGENT_IMAGE}:1.16 . --no-cache
 docker push ${VAULT_AGENT_IMAGE}:1.16
 
 cd ../../payments-processor
