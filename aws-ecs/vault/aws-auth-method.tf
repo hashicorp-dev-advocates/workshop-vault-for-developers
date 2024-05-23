@@ -34,6 +34,10 @@ resource "vault_policy" "payments_app" {
   name = var.application_name
 
   policy = <<EOT
+path "auth/token/lookup-self" {
+    capabilities = ["update"]
+}
+
 path "secret/*" {
   capabilities = ["read"]
 }

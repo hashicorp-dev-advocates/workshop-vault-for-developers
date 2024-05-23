@@ -32,6 +32,27 @@ data "aws_iam_policy_document" "client_policy" {
   }
 }
 
+resource "aws_iam_policy" "ecs_exec" {
+  name        = "ecs-exec"
+  description = "Policy for ECS task exec"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
 resource "aws_iam_policy" "ecr_pull" {
   name        = "ecr-pull"
   description = "Policy for ECS task to pull images"
@@ -88,7 +109,7 @@ resource "aws_iam_policy" "efs_access_point" {
           "elasticfilesystem:DescribeFileSystems"
         ]
         Effect   = "Allow"
-        Resource = "*"
+        Resource = data.terraform_remote_state.infrastructure.outputs.payments_efs_access_point_arn
       },
     ]
   })
@@ -102,7 +123,8 @@ resource "aws_iam_role" "vault_target_iam_role" {
     data.aws_iam_policy.security_compute_access.arn,
     aws_iam_policy.ecr_pull.arn,
     aws_iam_policy.ecs_logs.arn,
-    aws_iam_policy.efs_access_point.arn
+    aws_iam_policy.efs_access_point.arn,
+    aws_iam_policy.ecs_exec.arn
   ]
 }
 
