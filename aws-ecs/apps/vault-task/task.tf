@@ -31,7 +31,7 @@ locals {
             [
               {
                 containerName = "vault-agent"
-                condition     = var.vault_agent_exit_after_auth ? "SUCCESS" : "HEALTHY"
+                condition     = "HEALTHY"
               }
             ]
         ))
@@ -168,10 +168,6 @@ resource "aws_ecs_task_definition" "task" {
               {
                 name  = "PAYMENTS_APP_ENDPOINT"
                 value = "http://127.0.0.1:8081"
-              },
-              {
-                name  = "VAULT_AGENT_EXIT_AFTER_AUTH"
-                value = "false"
               }
             ])
           }

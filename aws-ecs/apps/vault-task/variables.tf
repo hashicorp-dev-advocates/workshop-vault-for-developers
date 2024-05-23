@@ -20,23 +20,6 @@ variable "vault_namespace" {
   default     = null
 }
 
-variable "vault_agent_template" {
-  description = "The base64-encoded Vault agent template to render secrets."
-  type        = string
-}
-
-variable "vault_agent_template_file_name" {
-  description = "File name of Vault agent template to render secrets. Default is `secrets`."
-  type        = string
-  default     = "secrets"
-}
-
-variable "vault_agent_exit_after_auth" {
-  description = "Exit the Vault agent after it retrieves the credentials from Vault. Must be `true` or `false`. Default is `true`."
-  type        = bool
-  default     = true
-}
-
 variable "requires_compatibilities" {
   description = "Set of launch types required by the task."
   type        = list(string)

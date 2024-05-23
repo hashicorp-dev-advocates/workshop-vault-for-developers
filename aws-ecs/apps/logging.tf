@@ -11,4 +11,12 @@ locals {
       awslogs-stream-prefix = "payments-processor"
     }
   }
+  payments_app_log_config = {
+    logDriver = "awslogs"
+    options = {
+      awslogs-group         = aws_cloudwatch_log_group.log_group.name
+      awslogs-region        = data.terraform_remote_state.infrastructure.outputs.region
+      awslogs-stream-prefix = "payments-app"
+    }
+  }
 }

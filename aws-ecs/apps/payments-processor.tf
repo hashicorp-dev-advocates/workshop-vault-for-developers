@@ -11,6 +11,14 @@ resource "aws_security_group" "payments_processor" {
     security_groups = [data.terraform_remote_state.infrastructure.outputs.ecs_security_group]
   }
 
+  ingress {
+    description     = "Allow inbound from load balancer"
+    from_port       = 8080
+    to_port         = 8080
+    protocol        = "tcp"
+    security_groups = [aws_security_group.payments_processor_alb.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -63,8 +71,71 @@ resource "aws_ecs_service" "payments_processor" {
   propagate_tags         = "TASK_DEFINITION"
   enable_execute_command = true
   load_balancer {
-    target_group_arn = data.terraform_remote_state.infrastructure.outputs.target_group_arn
+    target_group_arn = aws_lb_target_group.payments_processor.arn
     container_name   = "payments-processor"
     container_port   = 8080
+  }
+}
+
+resource "aws_security_group" "payments_processor_alb" {
+  name   = "payments-processor-alb"
+  vpc_id = data.terraform_remote_state.infrastructure.outputs.vpc.vpc_id
+
+  ingress {
+    description = "Allow access to payments-processor"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group_rule" "ingress_from_client_alb_to_ecs" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 65535
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.payments_processor_alb.id
+  security_group_id        = data.terraform_remote_state.infrastructure.outputs.ecs_security_group
+}
+
+resource "aws_lb" "payments_processor_alb" {
+  name               = "payments-processor"
+  internal           = false
+  load_balancer_type = "application"
+  security_groups    = [aws_security_group.payments_processor_alb.id]
+  subnets            = data.terraform_remote_state.infrastructure.outputs.vpc.public_subnets
+}
+
+resource "aws_lb_target_group" "payments_processor" {
+  name                 = "payments-processor"
+  port                 = 8080
+  protocol             = "HTTP"
+  vpc_id               = data.terraform_remote_state.infrastructure.outputs.vpc.vpc_id
+  target_type          = "ip"
+  deregistration_delay = 10
+  health_check {
+    path                = "/health"
+    healthy_threshold   = 2
+    unhealthy_threshold = 10
+    timeout             = 30
+    interval            = 60
+  }
+}
+
+resource "aws_lb_listener" "payments_processor" {
+  load_balancer_arn = aws_lb.payments_processor_alb.arn
+  port              = "80"
+  protocol          = "HTTP"
+  default_action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.payments_processor.arn
   }
 }
