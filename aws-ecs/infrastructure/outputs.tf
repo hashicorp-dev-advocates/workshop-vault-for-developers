@@ -52,12 +52,6 @@ output "database_security_group" {
   description = "Security group ID for product-db"
 }
 
-output "target_group_arn" {
-  value       = aws_lb_target_group.payments.arn
-  description = "Target group ARN for payments"
-  sensitive   = true
-}
-
 output "efs_file_system_id" {
   value       = module.efs.file_system_id
   description = "EFS file system ID for Vault agents on ECS"
@@ -72,11 +66,6 @@ output "payments_efs_access_point_arn" {
 output "payments_efs_access_point_id" {
   value       = aws_efs_access_point.payments.id
   description = "EFS access point ID for Vault agents on ECS"
-}
-
-output "payments_endpoint" {
-  value       = aws_lb.alb.dns_name
-  description = "Load balancer hostname for payments hosted on ECS cluster"
 }
 
 output "ecr" {

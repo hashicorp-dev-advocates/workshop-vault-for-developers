@@ -47,7 +47,7 @@ template {
 // with Spring Boot (Java).
 template {
   source      = "/vault-agent/processor.properties"
-  destination = "/vault-agent/config/processor.properties"
+  destination = "/config/processor.properties"
 
   // When Vault agent renders a new template (because a secret changed), run
   // a command to refresh the Spring Boot application.
