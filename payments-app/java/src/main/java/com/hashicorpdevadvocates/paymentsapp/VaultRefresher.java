@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
 
+@Profile({"!agent & !ecs"})
 @Component
-@Profile("!agent")
 public class VaultRefresher {
 
 	private final Log log = LogFactory.getLog(getClass());
