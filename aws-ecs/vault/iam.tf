@@ -32,11 +32,76 @@ data "aws_iam_policy_document" "client_policy" {
   }
 }
 
+resource "aws_iam_policy" "ecr_pull" {
+  name        = "ecr-pull"
+  description = "Policy for ECS task to pull images"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ecr:GetAuthorizationToken",
+          "ecr:BatchCheckLayerAvailability",
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "ecs_logs" {
+  name        = "ecs-logs"
+  description = "Policy for ECS task to create logs"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_policy" "efs_access_point" {
+  name        = "efs-access-point"
+  description = "Policy for task IAM role to access to EFS access point"
+  tags        = local.tags
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "elasticfilesystem:ClientMount",
+          "elasticfilesystem:ClientWrite"
+        ]
+        Effect   = "Allow"
+        Resource = data.terraform_remote_state.infrastructure.outputs.payments_efs_access_point_arn
+      },
+    ]
+  })
+}
+
 # IAM role for authenticating with Vault
 resource "aws_iam_role" "vault_target_iam_role" {
-  name                = "vault-authmethod-role"
-  assume_role_policy  = data.aws_iam_policy_document.client_policy.json
-  managed_policy_arns = [data.aws_iam_policy.security_compute_access.arn]
+  name               = "vault-authmethod-role"
+  assume_role_policy = data.aws_iam_policy_document.client_policy.json
+  managed_policy_arns = [
+    data.aws_iam_policy.security_compute_access.arn,
+    aws_iam_policy.ecr_pull.arn,
+    aws_iam_policy.ecs_logs.arn,
+    aws_iam_policy.efs_access_point.arn
+  ]
 }
 
 # Create user for Vault
