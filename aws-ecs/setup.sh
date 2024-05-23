@@ -17,11 +17,11 @@ export VAULT_TOKEN=$(cd infrastructure && terraform output -raw hcp_vault_admin_
 
 cd vault-agent
 docker build -t ${VAULT_AGENT_IMAGE}:1.16 .
-docker push ${VAULT_AGENT_IMAGE}
+docker push ${VAULT_AGENT_IMAGE}:1.16
 
 cd ../../payments-processor
 docker build -t ${PAYMENT_PROCESSOR_IMAGE}:1.0 .
-docker push ${PAYMENT_PROCESSOR_IMAGE}
+docker push ${PAYMENT_PROCESSOR_IMAGE}:1.0
 
 cd ../payments-app/java
 docker build -t ${PAYMENT_APP_IMAGE}:1.0 .
