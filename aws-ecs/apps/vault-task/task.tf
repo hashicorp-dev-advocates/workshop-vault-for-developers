@@ -149,7 +149,8 @@ resource "aws_ecs_task_definition" "task" {
             mountPoints = [
               local.vault_data_mount_read_write
             ]
-            cpu         = 0
+            cpu         = 512,
+            memory      = 1024,
             volumesFrom = [],
             healthCheck = {
               "command" : [

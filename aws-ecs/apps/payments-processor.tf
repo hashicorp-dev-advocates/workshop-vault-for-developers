@@ -67,9 +67,10 @@ resource "aws_ecs_service" "payments_processor" {
     assign_public_ip = false
     security_groups  = [aws_security_group.payments_processor.id]
   }
-  launch_type            = "FARGATE"
-  propagate_tags         = "TASK_DEFINITION"
-  enable_execute_command = true
+  launch_type                       = "FARGATE"
+  propagate_tags                    = "TASK_DEFINITION"
+  enable_execute_command            = true
+  health_check_grace_period_seconds = 30
   load_balancer {
     target_group_arn = aws_lb_target_group.payments_processor.arn
     container_name   = "payments-processor"
@@ -123,10 +124,11 @@ resource "aws_lb_target_group" "payments_processor" {
   deregistration_delay = 10
   health_check {
     path                = "/health"
+    matcher             = "204"
     healthy_threshold   = 2
     unhealthy_threshold = 10
     timeout             = 30
-    interval            = 60
+    interval            = 120
   }
 }
 

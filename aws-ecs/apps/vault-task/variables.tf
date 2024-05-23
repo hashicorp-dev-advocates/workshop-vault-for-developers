@@ -29,13 +29,13 @@ variable "requires_compatibilities" {
 variable "cpu" {
   description = "Number of cpu units used by the task."
   type        = number
-  default     = 256
+  default     = 1024
 }
 
 variable "memory" {
   description = "Amount (in MiB) of memory used by the task."
   type        = number
-  default     = 512
+  default     = 2048
 }
 
 variable "volumes" {
@@ -45,7 +45,7 @@ variable "volumes" {
 }
 
 variable "task_role" {
-  description = "ECS task role to include in the task definition. If not provided, a role is created."
+  description = "ECS task role to include in the task definition."
   type = object({
     id  = string
     arn = string
@@ -53,9 +53,8 @@ variable "task_role" {
 }
 
 variable "execution_role" {
-  description = "ECS execution role to include in the task definition. If not provided, a role is created."
+  description = "ECS execution role to include in the task definition."
   type = object({
-    id  = string
     arn = string
   })
 }
