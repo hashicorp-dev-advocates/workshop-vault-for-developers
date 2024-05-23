@@ -94,3 +94,7 @@ output "region" {
 output "ecs_cluster" {
   value = aws_ecs_cluster.cluster.id
 }
+
+output "vpc" {
+  value = module.vpc
+}
