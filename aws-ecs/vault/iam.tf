@@ -83,10 +83,12 @@ resource "aws_iam_policy" "efs_access_point" {
       {
         Action = [
           "elasticfilesystem:ClientMount",
-          "elasticfilesystem:ClientWrite"
+          "elasticfilesystem:ClientWrite",
+          "elasticfilesystem:DescribeMountTargets",
+          "elasticfilesystem:DescribeFileSystems"
         ]
         Effect   = "Allow"
-        Resource = data.terraform_remote_state.infrastructure.outputs.payments_efs_access_point_arn
+        Resource = "*"
       },
     ]
   })
