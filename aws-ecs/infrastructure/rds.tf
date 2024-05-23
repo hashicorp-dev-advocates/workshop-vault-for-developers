@@ -27,14 +27,14 @@ resource "aws_security_group" "database" {
   vpc_id      = module.vpc.default_vpc_default_security_group_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "machine_to_database" {
-  security_group_id = aws_security_group.database.id
+# resource "aws_vpc_security_group_ingress_rule" "machine_to_database" {
+#   security_group_id = aws_security_group.database.id
 
-  cidr_ipv4   = "0.0.0.0/0"
-  from_port   = 5432
-  ip_protocol = "tcp"
-  to_port     = 5432
-}
+#   cidr_ipv4   = "0.0.0.0/0"
+#   from_port   = 5432
+#   ip_protocol = "tcp"
+#   to_port     = 5432
+# }
 
 resource "aws_vpc_security_group_egress_rule" "database_outbound" {
   security_group_id = aws_security_group.database.id
