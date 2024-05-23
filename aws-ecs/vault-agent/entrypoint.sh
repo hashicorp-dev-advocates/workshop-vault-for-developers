@@ -13,4 +13,7 @@ sed -i "s~PAYMENTS_APP_ENDPOINT~${PAYMENTS_APP_ENDPOINT}~g" /vault-agent/agent.h
 
 sed -i "s~VAULT_AGENT_EXIT_AFTER_AUTH~${EXIT_AFTER_AUTH}~g" /vault-agent/agent.hcl
 
+sed -i "s~DATABASE_HOSTNAME~${DATABASE_HOSTNAME}~g" /vault-agent/database.properties
+sed -i "s~PAYMENTS_PROCESSOR_URL~${PAYMENTS_PROCESSOR_URL}~g" /vault-agent/processor.properties
+
 vault agent -config /vault-agent/agent.hcl
