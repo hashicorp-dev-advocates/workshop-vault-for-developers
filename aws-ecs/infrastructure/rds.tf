@@ -19,12 +19,17 @@ resource "aws_db_instance" "payments" {
   skip_final_snapshot    = true
   publicly_accessible    = true
   vpc_security_group_ids = [aws_security_group.database.id]
+  db_subnet_group_name   = aws_db_subnet_group.default.name
 }
 
 resource "aws_security_group" "database" {
   name        = "payments-database"
   description = "Security group for payments database"
-  vpc_id      = module.vpc.default_vpc_default_security_group_id
+  vpc_id      = module.vpc.vpc_id
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "machine_to_database" {

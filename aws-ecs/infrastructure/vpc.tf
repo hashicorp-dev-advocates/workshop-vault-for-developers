@@ -38,3 +38,8 @@ module "vpc" {
     key = "AmazonECSManaged"
   }
 }
+
+resource "aws_db_subnet_group" "default" {
+  name       = "${var.name}-db"
+  subnet_ids = module.vpc.public_subnets
+}
