@@ -116,11 +116,19 @@ resource "aws_security_group" "payments_app_alb" {
   vpc_id = data.terraform_remote_state.infrastructure.outputs.vpc.vpc_id
 
   ingress {
-    description = "Allow access to payments-app"
+    description = "Allow access to payments-app from client"
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.client_cidr_block]
+  }
+
+  ingress {
+    description = "Allow access to payments-app from VPC"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [data.terraform_remote_state.infrastructure.outputs.vpc.vpc_cidr_block]
   }
 
   egress {

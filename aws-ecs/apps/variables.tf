@@ -16,3 +16,9 @@ variable "payments_processor_password" {
   description = "Static password for payments processor"
   sensitive   = true
 }
+
+variable "client_cidr_block" {
+  type        = string
+  description = "Client CIDR block to access ALBs"
+  default     = "0.0.0.0/0"
+}
