@@ -1,4 +1,4 @@
-{{- with pkiCert "pki_int/issue/payments-app" "common_name=payments.hashicorpdevadvocates.com" -}}
+{{- with pkiCert "pki_int/issue/payments-app" "common_name=payments.hashicorpdevadvocates.com" "ttl=5m" -}}
 {{ .Cert }}{{ .CA }}{{ .Key }}
 {{ .Key | trimSpace | writeToFile "/vault-agent/config/certs/payments.key" "" "" "0400" }}
 {{ .CA | trimSpace | writeToFile "/vault-agent/config/certs/ca.pem" "" "" "0644" }}
