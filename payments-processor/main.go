@@ -18,6 +18,7 @@ var adminPassword = env.String("ADMIN_PASSWORD", true, "", "default password for
 type payment struct {
 	Name           string `json:"name"`
 	BillingAddress string `json:"billing_address"`
+	Number         string `json:"number"`
 	ID             string `json:"id,omitempty"`
 	Status         string `json:"status,omitempty"`
 }
@@ -35,9 +36,16 @@ func postPayment(c *gin.Context) {
 		return
 	}
 
+	number, _ := regexp.Compile(`[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}`)
+	if number.MatchString(newPayment.Number) {
+		newPayment.Status = "error, payment information for card number is not secure"
+		c.IndentedJSON(http.StatusBadRequest, newPayment)
+		return
+	}
+
 	address, _ := regexp.Compile(`\d+[ ](?:[A-Za-z0-9.-]+[ ]?)+(?:Avenue|Lane|Road|Boulevard|Drive|Street|Ave|Dr|Rd|Blvd|Ln|St)\.?`)
 	if address.MatchString(newPayment.BillingAddress) {
-		newPayment.Status = "error, payment information not secure"
+		newPayment.Status = "error, payment information for billing address is not secure"
 		c.IndentedJSON(http.StatusBadRequest, newPayment)
 		return
 	}
