@@ -1,7 +1,7 @@
 services:
 
   vault:
-    image: hashicorp/vault:1.16.1
+    image: hashicorp/vault:1.18.3
     restart: always
     command: [ 'vault', 'server', '-dev', '-dev-listen-address=0.0.0.0:8200']
     environment:
