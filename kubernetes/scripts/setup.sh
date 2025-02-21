@@ -111,3 +111,22 @@ vault write auth/kubernetes/role/payments-app \
      bound_service_account_namespaces=default \
      policies=payments \
      ttl=24h
+
+vault write -f transit/keys/payments-app
+
+vault policy write operator - <<EOH
+path "transit/encrypt/payments-app" {
+  capabilities = ["create", "update"]
+}
+
+path "transit/decrypt/payments-app" {
+  capabilities = ["create", "update"]
+}
+EOH
+
+vault write auth/kubernetes/role/operator \
+  bound_service_account_names=vault-secrets-operator-controller-manager \
+  bound_service_account_namespaces=vault \
+  token_period="24h" \
+  token_policies=operator \
+  audience="vault"

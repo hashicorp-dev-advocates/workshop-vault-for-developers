@@ -9,9 +9,10 @@ setup: minikube
 	kubectl apply -f applications/payments-processor.yaml
 	kubectl rollout status deployment/payments-processor
 	bash scripts/setup.sh
+	helm upgrade --install vault-secrets-operator hashicorp/vault-secrets-operator -f helm/vault-secrets-operator.yaml --namespace vault
 
 java:
-	kubectl apply -f applications/agent/payments-app.yaml
+	kubectl apply -f applications/vso/payments-app.yaml
 	kubectl rollout status deployment/payments-app
 
 java-sigterm:

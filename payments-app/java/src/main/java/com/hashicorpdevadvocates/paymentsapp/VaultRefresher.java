@@ -10,7 +10,7 @@ import org.springframework.vault.core.lease.SecretLeaseContainer;
 import org.springframework.vault.core.lease.event.SecretLeaseExpiredEvent;
 
 @Component
-@Profile("!agent")
+@Profile("!default")
 public class VaultRefresher {
 
 	private final Log log = LogFactory.getLog(getClass());

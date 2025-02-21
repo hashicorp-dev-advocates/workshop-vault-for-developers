@@ -1,0 +1,61 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: payments-app
+      app: payments-app
+  template:
+    metadata:
+      labels:
+        service: payments-app
+        app: payments-app
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "payments-app"
+        vault.hashicorp.com/agent-inject-token: "true"
+    spec:
+      serviceAccountName: payments-app
+      containers:
+        - name: payments-app
+          image: payments-app:java
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8081
+          command: ["/bin/sh"]
+          args: ["-c", "export VAULT_TOKEN=$(cat /vault/secrets/token) && java -XX:+UseContainerSupport -Djava.security.egd=file:/dev/./urandom -jar /app/app.jar"]
+          env:
+            - name: VAULT_ADDR
+              value: http://vault.vault:8200
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: "payments-app-database"
+                  key: username
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "payments-app-database"
+                  key: password
+            - name: PROCESSOR_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: "payments-app-processor"
+                  key: username
+            - name: PROCESSOR_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: "payments-app-processor"
+                  key: password
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8081
+            initialDelaySeconds: 15
+            timeoutSeconds: 1
+            periodSeconds: 10
+            failureThreshold: 30
