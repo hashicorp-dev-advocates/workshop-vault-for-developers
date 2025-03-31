@@ -7,7 +7,10 @@ payments-app/java/.gradle
 payments-app/java/build
 payments-app/java/bin
 payments-app/java/src/*.iml
+payments-app/java/target
 
 kubernetes/pidfile
 
 certs/
+
+.vscode/

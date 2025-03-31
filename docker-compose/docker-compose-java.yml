@@ -1,7 +1,7 @@
 services:
 
   vault-agent:
-    image: hashicorp/vault:1.16.1
+    image: hashicorp/vault:1.19
     restart: always
     command: [ 'vault', 'agent', '-config=/vault/config.hcl']
     volumes:
@@ -43,3 +43,4 @@ services:
 networks:
   vpcbr:
     name: workshop-vault-for-developers_vpcbr
+    external: true
